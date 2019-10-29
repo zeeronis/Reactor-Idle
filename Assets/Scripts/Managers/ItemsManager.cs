@@ -22,11 +22,11 @@ public class ItemsManager: MonoBehaviour
     private GameObject itemInfoPanelPrefab;
 
     [SerializeField]
-    private InspectorItemPrefab[] ventPrefabs;
+    private GameObject[] ventPrefabs;
     [SerializeField]
-    private InspectorItemPrefab[] pipePrefabs;
+    private GameObject[] pipePrefabs;
     [SerializeField]
-    private InspectorRodPrefab[] rodPrefabs;
+    private GameObject[] rodPrefabs;
 
 
     public GameObject explosionItemPrefab;
@@ -94,17 +94,17 @@ public class ItemsManager: MonoBehaviour
         if (Instance == null)
             Instance = this;
 
-        for (int i = 0; i < rodPrefabs.Length; i++)
+        for (int i = 0; i < itemsInfo[ItemType.Rod].Length; i++)
         {
-            itemsInfo[ItemType.Rod][i].prefab = rodPrefabs[i].prefab;
+            itemsInfo[ItemType.Rod][i].prefab = rodPrefabs[i];
         }
-        for (int i = 0; i < pipePrefabs.Length; i++)
+        for (int i = 0; i < itemsInfo[ItemType.HeatPipe].Length; i++)
         {
-            itemsInfo[ItemType.HeatPipe][i].prefab = pipePrefabs[i].prefab;
+            itemsInfo[ItemType.HeatPipe][i].prefab = pipePrefabs[i];
         }
-        for (int i = 0; i < ventPrefabs.Length; i++)
+        for (int i = 0; i < itemsInfo[ItemType.HeatVent].Length; i++)
         {
-            itemsInfo[ItemType.HeatVent][i].prefab = ventPrefabs[i].prefab;
+            itemsInfo[ItemType.HeatVent][i].prefab = ventPrefabs[i];
         }
 
         itemInfoPanel = Instantiate(itemInfoPanelPrefab, Vector3.zero, Quaternion.identity, UICanvasTransform).GetComponent<ItemInfoPanel>();
@@ -122,18 +122,4 @@ public class ItemsManager: MonoBehaviour
                            Quaternion.identity,
                            worldCanvasTransform);
     }
-}
-
-[Serializable]
-public class InspectorItemPrefab
-{
-    public GameObject prefab;
-    public ItemGradeType itemType;
-}
-
-[Serializable]
-public class InspectorRodPrefab
-{
-    public GameObject prefab;
-    public RodType itemType;
 }

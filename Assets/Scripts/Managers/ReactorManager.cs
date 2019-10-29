@@ -341,7 +341,7 @@ public class ReactorManager : MonoBehaviour
         ItemInfo itemInfo = ItemsManager.Instance.itemsInfo[cell.cellItem.ItemType][cell.cellItem.itemGradeType];
         if (cell.cellItem.ItemType == ItemType.Rod)
         {
-            PlayerManager.Instance.Money += itemInfo.cost - itemInfo.cost * (cell.cellItem.durability / itemInfo.durability);
+            PlayerManager.Instance.Money += itemInfo.cost * (cell.cellItem.durability / itemInfo.durability);
         }
         else
         {
