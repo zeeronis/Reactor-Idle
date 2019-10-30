@@ -38,13 +38,4 @@ public class Cell : MonoBehaviour
             }
         }
     }
-
-    private void OnMouseEnter()
-    {
-        if (ReactorManager.Instance.buildMod)
-        {
-            ReactorManager.Instance.MovePreBuyItem(transform.position, 
-                                                   cellItem == null ? true : false);
-        }
-    }
 }

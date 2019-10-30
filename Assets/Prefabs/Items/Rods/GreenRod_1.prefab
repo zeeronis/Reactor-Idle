@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2271655352573605457}
-  - component: {fileID: 6941861346888209399}
   - component: {fileID: 2787748361556117988}
+  - component: {fileID: 6941861346888209399}
   m_Layer: 0
   m_Name: GreenRod_1
   m_TagString: Untagged
@@ -32,6 +32,23 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2787748361556117988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8002109080091699007}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f945b15e7a45f6f4e9ede79fb9966c74, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hpBar: {fileID: 0}
+  ItemType: 0
+  itemGradeType: 0
+  durability: 0
+  heat: 0
 --- !u!212 &6941861346888209399
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -81,20 +98,3 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &2787748361556117988
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8002109080091699007}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f945b15e7a45f6f4e9ede79fb9966c74, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hpBar: {fileID: 0}
-  ItemType: 0
-  itemGradeType: 0
-  durability: 0
-  heat: 0

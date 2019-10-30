@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public abstract class ItemInfo
+public class ItemInfo
 {
     public GameObject prefab;
     public float durability;
@@ -13,5 +13,8 @@ public abstract class ItemInfo
     public string keyName;
     public string keyDesc;
 
-    internal abstract string GetLocaleDesc(string nonFormattedText);
+    internal virtual string GetLocaleDesc(string nonFormattedText)
+    {
+        return string.Format(nonFormattedText, durability);
+    }
 }

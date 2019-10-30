@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 public class RodInfo: ItemInfo
 {
-    public RodType rodType;
     public float outEnergy;
     public float outHeat;
 

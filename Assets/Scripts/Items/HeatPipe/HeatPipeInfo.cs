@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 public class HeatPipeInfo: ItemInfo
 {
-    public ItemGradeType heatPipeType;
     public float heatThroughput;
 
     internal override string GetLocaleDesc(string nonFormattedText)

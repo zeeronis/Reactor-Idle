@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 public class HeatVentInfo: ItemInfo
 {
-    public ItemGradeType heatVentType;
     public float decreaseHeat;
 
     internal override string GetLocaleDesc(string nonFormattedText)

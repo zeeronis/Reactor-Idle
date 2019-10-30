@@ -24,7 +24,10 @@ public class ReactorManager : MonoBehaviour
         [ItemType.Rod] = new List<Cell>(),
         [ItemType.HeatPipe] = new List<Cell>(),
         [ItemType.HeatVent] = new List<Cell>(),
+        [ItemType.HeatPlate] = new List<Cell>(),
+        [ItemType.Battery] = new List<Cell>(),
     };
+    private List<Cell> usedRodList = new List<Cell>();
     [SerializeField]
     private GameObject cellPrefab;
     private const float cellOffset = 2.5603f;
@@ -32,7 +35,7 @@ public class ReactorManager : MonoBehaviour
     private float updateRate = 0.5f;
     private float nextUpdateTime = 0;
 
-    private GameObject preBuyItem;
+    private GameObject preBuyItemPrefab;
     public bool buildMod = false;
 
     public float Power
@@ -83,12 +86,19 @@ public class ReactorManager : MonoBehaviour
      = UI  
      ================
     */
+    private List<IItem> _selectedItems = new List<IItem>();
+    private List<Cell> _destroyList = new List<Cell>();
+    private Cell _selectedCell;
     private void FixedUpdate()
     {
         if (nextUpdateTime > Time.time || PlayerManager.Instance.PauseMode)
             return;
 
-        if(heat == maxHeat)
+        var sw = new System.Diagnostics.Stopwatch();
+        sw.Start();
+
+        _destroyList.Clear();
+        if (heat == maxHeat)
         {
             for (int i = 0; i < itemsDictionary.Count; i++)
             {
@@ -105,54 +115,39 @@ public class ReactorManager : MonoBehaviour
         float addMoney = 0;
         float addHeat = 0;
         float addPower = 0;
-        Cell selectedCell;
-        List<IItem> selectedItems = new List<IItem>();
-        List<Cell> destroyList = new List<Cell>();
 
         //Rods
         foreach (var cell in itemsDictionary[ItemType.Rod])
         {
-            selectedItems.Clear();
+            _selectedItems.Clear();
             if (cell.cellIndex.y > 0) //up
             {
-                selectedCell = cellsGrid[(int)cell.cellIndex.x, (int)cell.cellIndex.y - 1];
-                if(selectedCell.cellItem != null && selectedCell.cellItem.ItemType != ItemType.Rod)
-                {
-                    selectedItems.Add(selectedCell.cellItem);
-                }
+                _selectedCell = cellsGrid[(int)cell.cellIndex.x, (int)cell.cellIndex.y - 1];
+                CheckSelectedCell();
             }
             if(cell.cellIndex.y < cellsGrid.GetLength(1) - 1) //down
             {
-                selectedCell = cellsGrid[(int)cell.cellIndex.x, (int)cell.cellIndex.y + 1];
-                if (selectedCell.cellItem != null && selectedCell.cellItem.ItemType != ItemType.Rod)
-                {
-                    selectedItems.Add(selectedCell.cellItem);
-                }
+                _selectedCell = cellsGrid[(int)cell.cellIndex.x, (int)cell.cellIndex.y + 1];
+                CheckSelectedCell();
             }
             if (cell.cellIndex.x > 0) //left
             {
-                selectedCell = cellsGrid[(int)cell.cellIndex.x - 1, (int)cell.cellIndex.y];
-                if (selectedCell.cellItem != null && selectedCell.cellItem.ItemType != ItemType.Rod)
-                {
-                    selectedItems.Add(selectedCell.cellItem);
-                }
+                _selectedCell = cellsGrid[(int)cell.cellIndex.x - 1, (int)cell.cellIndex.y];
+                CheckSelectedCell();
             }
             if (cell.cellIndex.x < cellsGrid.GetLength(0) - 1) //right
             {
-                selectedCell = cellsGrid[(int)cell.cellIndex.x + 1, (int)cell.cellIndex.y];
-                if (selectedCell.cellItem != null && selectedCell.cellItem.ItemType != ItemType.Rod)
-                {
-                    selectedItems.Add(selectedCell.cellItem);
-                }
+                _selectedCell = cellsGrid[(int)cell.cellIndex.x + 1, (int)cell.cellIndex.y];
+                CheckSelectedCell();
             }
 
             cell.cellItem.durability--;
             cell.cellItem.UpdateDurabilityBar();
             RodInfo rodInfo = (RodInfo)ItemsManager.Instance.itemsInfo[cell.cellItem.ItemType][cell.cellItem.itemGradeType];
-            if(selectedItems.Count != 0)
+            if(_selectedItems.Count != 0)
             {
-                float heatPerCell = rodInfo.outHeat / selectedItems.Count;
-                foreach (var item in selectedItems)
+                float heatPerCell = rodInfo.outHeat / _selectedItems.Count;
+                foreach (var item in _selectedItems)
                 {
                     item.heat += heatPerCell;
                 }
@@ -166,7 +161,7 @@ public class ReactorManager : MonoBehaviour
             //destroy rod check
             if(cell.cellItem.durability <= 0)
             {
-                destroyList.Add(cell);
+                _destroyList.Add(cell);
             }
         }
 
@@ -174,66 +169,58 @@ public class ReactorManager : MonoBehaviour
         //Pipes
         foreach (var cell in itemsDictionary[ItemType.HeatPipe])
         {
-            if (cell.cellIndex.y > 0) //up
+            if(cell.cellItem.heat != 0)
             {
-                selectedCell = cellsGrid[(int)cell.cellIndex.x, (int)cell.cellIndex.y - 1];
-                if (selectedCell.cellItem != null && selectedCell.cellItem.ItemType != ItemType.Rod)
+                _selectedItems.Clear();
+                if (cell.cellIndex.y > 0) //up
                 {
-                    selectedItems.Add(selectedCell.cellItem);
+                    _selectedCell = cellsGrid[(int)cell.cellIndex.x, (int)cell.cellIndex.y - 1];
+                    CheckSelectedCell();
                 }
-            }
-            if (cell.cellIndex.y < cellsGrid.GetLength(1) - 1) //down
-            {
-                selectedCell = cellsGrid[(int)cell.cellIndex.x, (int)cell.cellIndex.y + 1];
-                if (selectedCell.cellItem != null && selectedCell.cellItem.ItemType != ItemType.Rod)
+                if (cell.cellIndex.y < cellsGrid.GetLength(1) - 1) //down
                 {
-                    selectedItems.Add(selectedCell.cellItem);
+                    _selectedCell = cellsGrid[(int)cell.cellIndex.x, (int)cell.cellIndex.y + 1];
+                    CheckSelectedCell();
                 }
-            }
-            if (cell.cellIndex.x > 0) //left
-            {
-                selectedCell = cellsGrid[(int)cell.cellIndex.x - 1, (int)cell.cellIndex.y];
-                if (selectedCell.cellItem != null && selectedCell.cellItem.ItemType != ItemType.Rod)
+                if (cell.cellIndex.x > 0) //left
                 {
-                    selectedItems.Add(selectedCell.cellItem);
+                    _selectedCell = cellsGrid[(int)cell.cellIndex.x - 1, (int)cell.cellIndex.y];
+                    CheckSelectedCell();
                 }
-            }
-            if (cell.cellIndex.x < cellsGrid.GetLength(0) - 1) //right
-            {
-                selectedCell = cellsGrid[(int)cell.cellIndex.x + 1, (int)cell.cellIndex.y];
-                if (selectedCell.cellItem != null && selectedCell.cellItem.ItemType != ItemType.Rod)
+                if (cell.cellIndex.x < cellsGrid.GetLength(0) - 1) //right
                 {
-                    selectedItems.Add(selectedCell.cellItem);
-                }
-            }
-
-            HeatPipeInfo pipeInfo = (HeatPipeInfo)ItemsManager.Instance.itemsInfo[cell.cellItem.ItemType][cell.cellItem.itemGradeType];
-            if (selectedItems.Count != 0)
-            {
-                float heatPerCell = 0;
-                if (cell.cellItem.heat > selectedItems.Count * pipeInfo.heatThroughput)
-                {
-                    heatPerCell = pipeInfo.heatThroughput;
-                    cell.cellItem.heat -= selectedItems.Count * pipeInfo.heatThroughput;
-                }
-                else
-                {
-                    heatPerCell = cell.cellItem.heat / selectedItems.Count;
-                    cell.cellItem.heat = 0;
+                    _selectedCell = cellsGrid[(int)cell.cellIndex.x + 1, (int)cell.cellIndex.y];
+                    CheckSelectedCell();
                 }
 
-                foreach (var item in selectedItems)
+                HeatPipeInfo pipeInfo = (HeatPipeInfo)ItemsManager.Instance.itemsInfo[cell.cellItem.ItemType][cell.cellItem.itemGradeType];
+                if (_selectedItems.Count != 0)
                 {
-                    item.heat += heatPerCell;
-                }
-            }
-            cell.cellItem.UpdateHeatBar();
+                    float heatPerCell = 0;
+                    if (cell.cellItem.heat > _selectedItems.Count * pipeInfo.heatThroughput)
+                    {
+                        heatPerCell = pipeInfo.heatThroughput;
+                        cell.cellItem.heat -= _selectedItems.Count * pipeInfo.heatThroughput;
+                    }
+                    else
+                    {
+                        heatPerCell = cell.cellItem.heat / _selectedItems.Count;
+                        cell.cellItem.heat = 0;
+                    }
 
-            //destroy pipe check
-            if (cell.cellItem.durability <= cell.cellItem.heat)
-            {
-                destroyList.Add(cell);
-            }
+                    foreach (var item in _selectedItems)
+                    {
+                        item.heat += heatPerCell;
+                    }
+                }
+                cell.cellItem.UpdateHeatBar();
+
+                //destroy pipe check
+                if (cell.cellItem.durability <= cell.cellItem.heat)
+                {
+                    _destroyList.Add(cell);
+                }
+            } 
         }
 
 
@@ -246,25 +233,59 @@ public class ReactorManager : MonoBehaviour
                 cell.cellItem.heat = 0;
             cell.cellItem.UpdateHeatBar();
 
-            //destroy pipe check
+            //destroy vent check
             if (cell.cellItem.durability <= cell.cellItem.heat)
             {
-                destroyList.Add(cell);
+                _destroyList.Add(cell);
             }
         }
 
 
-        //Destroy
-        foreach (var cell in destroyList)
+        //destroy
+        foreach (var cell in _destroyList)
         {
-            DestroyItem(cell, cell.cellItem.ItemType != ItemType.Rod? true : false);
+            if (cell.cellItem.ItemType == ItemType.Rod)
+            {
+                itemsDictionary[ItemType.Rod].Remove(cell);
+                usedRodList.Add(cell);
+                cell.cellItem.GetComponent<SpriteRenderer>().color = new Color32(255, 255, 255, 128);
+                cell.cellItem.durability = 0;
+            }
+            else
+            {
+                DestroyItem(cell, true);
+            }
         }
-        
 
-        //UI
+
+
+        //UI//Heat//Energy
         Heat += addHeat;
         Power += addPower;
         PlayerManager.Instance.Money += addMoney;
+
+
+        //DEBUG
+        sw.Stop();
+        Debug.Log("ticks: " + sw.ElapsedTicks);
+    }
+
+    private void CheckSelectedCell()
+    {
+        
+        if (_selectedCell.cellItem != null
+                    && _selectedCell.cellItem.ItemType != ItemType.Rod
+                    && _selectedCell.cellItem.ItemType != ItemType.HeatPlate)
+        {
+            if (_selectedCell.cellItem.ItemType != ItemType.Battery)
+            {
+                _selectedItems.Add(_selectedCell.cellItem);
+            }
+            else
+            {
+                _destroyList.Add(_selectedCell);
+            }
+        }
     }
 
     private void DestroyItem(Cell cell, bool explosion)
@@ -278,6 +299,16 @@ public class ReactorManager : MonoBehaviour
                                                                              Quaternion.identity, 
                                                                              transform).GetComponent<ExplosionAnimation>();
             explosionAnimation.Play();
+        }
+        if(cell.cellItem.ItemType == ItemType.Battery)
+        {
+            ItemInfo info = ItemsManager.Instance.itemsInfo[cell.cellItem.ItemType][cell.cellItem.itemGradeType];
+            maxPower -= info.durability;
+        }
+        if(cell.cellItem.ItemType == ItemType.HeatPlate)
+        {
+            ItemInfo info = ItemsManager.Instance.itemsInfo[cell.cellItem.ItemType][cell.cellItem.itemGradeType];
+            maxHeat -= info.durability;
         }
         itemsDictionary[cell.cellItem.ItemType].Remove(cell);
         Destroy(cell.cellItem.hpBar.gameObject);
@@ -316,23 +347,15 @@ public class ReactorManager : MonoBehaviour
 
     public void MovePreBuyItem(Vector2 position, bool isEmptyCell)
     {
-        preBuyItem.transform.position = position;
-        preBuyItem.GetComponent<SpriteRenderer>().color = isEmptyCell ?
+        preBuyItemPrefab.transform.position = position;
+        preBuyItemPrefab.GetComponent<SpriteRenderer>().color = isEmptyCell ?
             new Color32(255, 255, 255, 255) : new Color32(255, 131, 131, 131);
 
     }
 
     public void SelectPreBuildItem(GameObject prefab)
     {
-        if(preBuyItem != null)
-        {
-            Destroy(preBuyItem);
-        }
-
-        preBuyItem = Instantiate(prefab,
-                                 Camera.main.ScreenToWorldPoint(Input.mousePosition),
-                                 Quaternion.identity,
-                                 transform);
+        preBuyItemPrefab = prefab;
         buildMod = true;
     }
 
@@ -361,13 +384,42 @@ public class ReactorManager : MonoBehaviour
     public void BuyItem(Vector2 cellIndex)
     {
         Cell cell = cellsGrid[(int)cellIndex.x, (int)cellIndex.y];
-        if (cell.cellItem == null)
+        if (cell.cellItem == null || cell.cellItem.durability == 0)
         {
-            IItem item = preBuyItem.GetComponent<IItem>();
+
+            IItem item = preBuyItemPrefab.GetComponent<IItem>();
             ItemInfo itemInfo = ItemsManager.Instance.itemsInfo[item.ItemType][item.itemGradeType];
             if(itemInfo.cost <= PlayerManager.Instance.Money)
             {
                 PlayerManager.Instance.Money -= itemInfo.cost;
+
+                Vector3 position = cell.transform.position;
+                position.z = 0;
+                if (cell.cellItem != null)
+                {
+                    if(item.ItemType == ItemType.Rod)
+                    {
+                        item = cell.cellItem;
+                        item.GetComponent<SpriteRenderer>().color = new Color32(255, 255, 255, 255);
+                        itemsDictionary[ItemType.Rod].Add(cell);
+                        usedRodList.Remove(cell);
+                    }
+                    else
+                    {
+                        DestroyItem(cell, false);
+                        item = Instantiate(preBuyItemPrefab,
+                                     position,
+                                     Quaternion.identity,
+                                     transform).GetComponent<IItem>();
+                    }
+                }
+                else
+                {
+                    item = Instantiate(preBuyItemPrefab,
+                                     position,
+                                     Quaternion.identity,
+                                     transform).GetComponent<IItem>();
+                }
 
                 item.durability = itemInfo.durability;
                 item.hpBar = ItemsManager.Instance.GetSliderObject(cell.transform.position);
@@ -377,8 +429,10 @@ public class ReactorManager : MonoBehaviour
 
                 itemsDictionary[item.ItemType].Add(cell);
 
-                preBuyItem = null;
-                buildMod = false;
+                if (cell.cellItem.ItemType == ItemType.Battery)
+                    maxPower += itemInfo.durability;
+                if (cell.cellItem.ItemType == ItemType.HeatPlate)
+                    maxHeat += itemInfo.durability;
             }
         }
     }
