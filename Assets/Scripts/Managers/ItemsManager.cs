@@ -39,7 +39,7 @@ public class ItemsManager: MonoBehaviour
         {
             new RodInfo() {
                 rodType = RodType.GreenX1,
-                durability = 20,
+                durability = 15,
                 outEnergy = 1,
                 outHeat = 1,
                 cost = 10,
@@ -48,19 +48,19 @@ public class ItemsManager: MonoBehaviour
             },
             new RodInfo() {
                 rodType = RodType.GreenX2,
-                durability = 25,
+                durability = 15,
                 outEnergy = 4,
                 outHeat = 8,
-                cost = 50,
+                cost = 25,
                 keyName = "Item.RodX2.name",
                 keyDesc = "Item.Rod.desc"
             },
             new RodInfo() {
                 rodType = RodType.GreenX4,
-                durability = 30,
+                durability = 15,
                 outEnergy = 16,
-                outHeat = 32,
-                cost = 240,
+                outHeat = 36,
+                cost = 60,
                 keyName = "Item.RodX4.name",
                 keyDesc = "Item.Rod.desc"
             },
@@ -69,9 +69,9 @@ public class ItemsManager: MonoBehaviour
         {
             new HeatVentInfo() {
                 heatVentType = ItemGradeType.MK1,
-                durability = 50,
+                durability = 40,
                 decreaseHeat = 4,
-                cost = 100,
+                cost = 50,
                 keyName = "Item.Vent_1.name",
                 keyDesc = "Item.Vent.desc"
             }
@@ -82,7 +82,7 @@ public class ItemsManager: MonoBehaviour
                 heatPipeType = ItemGradeType.MK1,
                 durability = 75,
                 heatThroughput = 12,
-                cost = 300,
+                cost = 160,
                 keyName = "Item.Pipe_1.name",
                 keyDesc = "Item.Pipe.desc"
             },
