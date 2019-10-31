@@ -108,6 +108,7 @@ public class ReactorManager : MonoBehaviour
     private List<IItem> _selectedItems = new List<IItem>();
     private List<Cell> _destroyList = new List<Cell>();
     private Cell _selectedCell;
+
     private void FixedUpdate()
     {
         if (nextUpdateTime > Time.time || PlayerManager.Instance.PauseMode)
@@ -134,29 +135,35 @@ public class ReactorManager : MonoBehaviour
         float addMoney = 0;
         float addHeat = 0;
         float addPower = 0;
+        float rodMultipler;
 
         //Rods
         foreach (var cell in itemsDictionary[ItemType.Rod])
         {
+            rodMultipler = 1;
             _selectedItems.Clear();
             if (cell.cellIndex.y > 0) //up
             {
                 _selectedCell = cellsGrid[(int)cell.cellIndex.x, (int)cell.cellIndex.y - 1];
+                if (_selectedCell.cellItem?.ItemType == ItemType.Rod) rodMultipler += 1f;
                 CheckSelectedCell();
             }
             if(cell.cellIndex.y < cellsGrid.GetLength(1) - 1) //down
             {
                 _selectedCell = cellsGrid[(int)cell.cellIndex.x, (int)cell.cellIndex.y + 1];
+                if (_selectedCell.cellItem?.ItemType == ItemType.Rod) rodMultipler += 1f;
                 CheckSelectedCell();
             }
             if (cell.cellIndex.x > 0) //left
             {
                 _selectedCell = cellsGrid[(int)cell.cellIndex.x - 1, (int)cell.cellIndex.y];
+                if (_selectedCell.cellItem?.ItemType == ItemType.Rod) rodMultipler += 1f;
                 CheckSelectedCell();
             }
             if (cell.cellIndex.x < cellsGrid.GetLength(0) - 1) //right
             {
                 _selectedCell = cellsGrid[(int)cell.cellIndex.x + 1, (int)cell.cellIndex.y];
+                if (_selectedCell.cellItem?.ItemType == ItemType.Rod) rodMultipler += 1f;
                 CheckSelectedCell();
             }
 
@@ -165,7 +172,7 @@ public class ReactorManager : MonoBehaviour
             RodInfo rodInfo = (RodInfo)ItemsManager.Instance.itemsInfo[cell.cellItem.ItemType][cell.cellItem.itemGradeType];
             if(_selectedItems.Count != 0)
             {
-                float heatPerCell = rodInfo.outHeat / _selectedItems.Count;
+                float heatPerCell = (rodInfo.outHeat * rodMultipler) / _selectedItems.Count;
                 foreach (var item in _selectedItems)
                 {
                     item.heat += heatPerCell;
@@ -173,9 +180,9 @@ public class ReactorManager : MonoBehaviour
             }
             else
             {
-                addHeat += rodInfo.outHeat;
+                addHeat += rodInfo.outHeat * rodMultipler;
             }
-            addPower += rodInfo.outEnergy;
+            addPower += rodInfo.outPower * rodMultipler;
 
             //destroy rod check
             if(cell.cellItem.durability <= 0)
@@ -212,19 +219,27 @@ public class ReactorManager : MonoBehaviour
                     CheckSelectedCell();
                 }
 
+                for (int i = 0; i < _selectedItems.Count; i++)
+                {
+                    if (_selectedItems[i].heat > cell.cellItem.heat)
+                    {
+                        _selectedItems.Remove(_selectedItems[i]);
+                        i--;
+                    }
+                }
                 HeatPipeInfo pipeInfo = (HeatPipeInfo)ItemsManager.Instance.itemsInfo[cell.cellItem.ItemType][cell.cellItem.itemGradeType];
                 if (_selectedItems.Count != 0)
                 {
                     float heatPerCell = 0;
-                    if (cell.cellItem.heat > _selectedItems.Count * pipeInfo.heatThroughput)
-                    {
-                        heatPerCell = pipeInfo.heatThroughput;
-                        cell.cellItem.heat -= _selectedItems.Count * pipeInfo.heatThroughput;
-                    }
-                    else
+                    if(cell.cellItem.heat <= pipeInfo.heatThroughput)
                     {
                         heatPerCell = cell.cellItem.heat / _selectedItems.Count;
                         cell.cellItem.heat = 0;
+                    }
+                    else
+                    {
+                        heatPerCell = pipeInfo.heatThroughput / _selectedItems.Count;
+                        cell.cellItem.heat -= pipeInfo.heatThroughput;
                     }
 
                     foreach (var item in _selectedItems)

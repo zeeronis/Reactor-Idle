@@ -3,13 +3,32 @@ UI.SellPower = Продать энергию
 UI.DecreaseHeat = Уменьшить тепло
 UI.Cost = Цена:
 
-Item.RodX1.name = Cтержень
-Item.RodX2.name = Сдвоенный стержень
-Item.RodX4.name = Четверной стержень
+Item.0_RodX1.name = Зелёный тержень х1
+Item.0_RodX2.name = Зелёный тержень х2
+Item.0_RodX4.name = Зелёный тержень х4
+Item.1_RodX1.name = Жёлтый тержень х1
+Item.1_RodX2.name = Жёлтый тержень х2
+Item.1_RodX4.name = Жёлтый тержень х4
+Item.2_RodX1.name = Голубой тержень х1
+Item.2_RodX2.name = Голубой тержень х2
+Item.2_RodX4.name = Голубой тержень х4
+Item.3_RodX1.name = Фиолетовый тержень х1
+Item.3_RodX2.name = Фиолетовый тержень х2
+Item.3_RodX4.name = Фиолетовый тержень х4
+Item.4_RodX1.name = Красный тержень х1
+Item.4_RodX2.name = Красный тержень х2
+Item.4_RodX4.name = Красный тержень х4
+Item.5_RodX1.name = Оранжевый тержень х1
+Item.5_RodX2.name = Оранжевый тержень х2
+Item.5_RodX4.name = Оранжевый тержень х4
 Item.Rod.desc = Выдаёт {0} энергии и {1} тепла каждый тик. Тепло распределяется между соседними клетками.
 
-Item.Vent_1.name = Базовый тепловой вентилятор
-Item.Vent.desc = Охлаждает себя на {0} единиц тепла каждый тик.
+Item.0_Vent_1.name = Базовый вентилятор
+Item.0_Vent_2.name = Улучшенный вентилятор
+Item.0_Vent_3.name = Стандартный вентилятор
+Item.0_Vent_4.name = Продвинутый вентилятор
+Item.0_Vent_5.name = Фазовый вентилятор
+Item.Vent.desc = Охлаждает себя на {0} тепла каждый тик.
 
 Item.Pipe_1.name = Базовая тепловая труба
 Item.Pipe.desc = Распределяет полученное тепло между соседними клетками.

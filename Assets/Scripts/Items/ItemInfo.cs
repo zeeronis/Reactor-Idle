@@ -5,8 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
+[Serializable]
 public class ItemInfo
 {
+    [NonSerialized]
     public GameObject prefab;
     public float durability;
     public float cost;

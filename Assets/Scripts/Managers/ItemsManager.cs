@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -43,26 +46,26 @@ public class ItemsManager: MonoBehaviour
         {
             new RodInfo() {
                 durability = 15,
-                outEnergy = 1,
+                outPower = 1,
                 outHeat = 1,
                 cost = 10,
-                keyName = "Item.RodX1.name",
+                keyName = "Item.0_RodX1.name",
                 keyDesc = "Item.Rod.desc"
             },
             new RodInfo() {
                 durability = 15,
-                outEnergy = 4,
+                outPower = 4,
                 outHeat = 8,
                 cost = 25,
-                keyName = "Item.RodX2.name",
+                keyName = "Item.0_RodX2.name",
                 keyDesc = "Item.Rod.desc"
             },
             new RodInfo() {
                 durability = 15,
-                outEnergy = 16,
+                outPower = 16,
                 outHeat = 36,
                 cost = 60,
-                keyName = "Item.RodX4.name",
+                keyName = "Item.0_RodX4.name",
                 keyDesc = "Item.Rod.desc"
             },
         },
@@ -79,8 +82,8 @@ public class ItemsManager: MonoBehaviour
         [ItemType.HeatPipe] = new HeatPipeInfo[]
         {
             new HeatPipeInfo() {
-                durability = 75,
-                heatThroughput = 12,
+                durability = 320,
+                heatThroughput = 16,
                 cost = 160,
                 keyName = "Item.Pipe_1.name",
                 keyDesc = "Item.Pipe.desc"
@@ -111,27 +114,57 @@ public class ItemsManager: MonoBehaviour
         if (Instance == null)
             Instance = this;
 
-        //test load variant, change to one "for" when stats doe items will be completed
-        for (int i = 0; i < itemsInfo[ItemType.Rod].Length; i++)
+        Generate.Run();
+        //return;
+
+
+        TextAsset asset = Resources.Load("Items") as TextAsset;
+        BinaryFormatter formatter = new BinaryFormatter();
+
+        using (Stream stream = new MemoryStream(asset.bytes))
         {
-            itemsInfo[ItemType.Rod][i].prefab = rodPrefabs[i];
+            //BinaryReader binaryReader = new BinaryReader(stream);
+       
+            itemsInfo = (Dictionary<ItemType, ItemInfo[]>)formatter.Deserialize(stream);
         }
-        for (int i = 0; i < itemsInfo[ItemType.HeatPipe].Length; i++)
+          
+        /*
+        
+        using (FileStream fs = new FileStream("test.dat", FileMode.OpenOrCreate))
+        {
+            
+        }*/
+
+        //test load variant, change to one "for" when stats doe items will be completed
+        /*for (int i = 0; i < itemsInfo[ItemType.HeatPipe].Length; i++)
         {
             itemsInfo[ItemType.HeatPipe][i].prefab = pipePrefabs[i];
-        }
+        }*/
         for (int i = 0; i < itemsInfo[ItemType.HeatVent].Length; i++)
         {
             itemsInfo[ItemType.HeatVent][i].prefab = ventPrefabs[i];
         }
-        for (int i = 0; i < itemsInfo[ItemType.Battery].Length; i++)
+       /* for (int i = 0; i < itemsInfo[ItemType.Battery].Length; i++)
         {
             itemsInfo[ItemType.Battery][i].prefab = BatteryPrefabs[i];
         }
         for (int i = 0; i < itemsInfo[ItemType.HeatPlate].Length; i++)
         {
             itemsInfo[ItemType.HeatPlate][i].prefab = heatPlatePrefabs[i];
+        }*/
+
+        for (int i = 0; i < itemsInfo[ItemType.Rod].Length; i++)
+        {
+            itemsInfo[ItemType.Rod][i].prefab = rodPrefabs[i];
         }
+        /*
+        for (int i = 0; i < 5; i++)
+        {
+            itemsInfo[ItemType.HeatPipe][i].prefab = pipePrefabs[i];
+            itemsInfo[ItemType.HeatVent][i].prefab = ventPrefabs[i];
+            itemsInfo[ItemType.Battery][i].prefab = BatteryPrefabs[i];
+            itemsInfo[ItemType.HeatPlate][i].prefab = heatPlatePrefabs[i];
+        }*/
 
         itemInfoPanel = Instantiate(itemInfoPanelPrefab, Vector3.zero, Quaternion.identity, UICanvasTransform).GetComponent<ItemInfoPanel>();
         itemInfoPanel.gameObject.SetActive(false);

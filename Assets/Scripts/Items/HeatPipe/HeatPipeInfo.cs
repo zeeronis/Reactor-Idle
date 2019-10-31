@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+[Serializable]
 public class HeatPipeInfo: ItemInfo
 {
     public float heatThroughput;
