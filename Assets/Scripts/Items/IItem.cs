@@ -9,6 +9,7 @@ using UnityEngine.UI;
 public class IItem: MonoBehaviour
 {
     public Slider hpBar;
+    public bool currentlyInUse;
 
     public ItemType ItemType;
     public int itemGradeType;
