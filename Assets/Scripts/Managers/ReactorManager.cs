@@ -77,7 +77,7 @@ public class ReactorManager : MonoBehaviour
 
     public float MaxHeat
     {
-        get { return maxPower; }
+        get { return maxHeat; }
         set
         {
             maxHeat = value;
