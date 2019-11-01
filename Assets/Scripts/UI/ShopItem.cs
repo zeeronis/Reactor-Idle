@@ -10,11 +10,19 @@ public class ShopItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     [SerializeField]
     private int itemGradeType;
 
+    private Transform itemTransform;
+
+    public void Start()
+    {
+        itemTransform = transform;
+    }
+
 
     public void Click()
     {
         ReactorManager.Instance.SelectPreBuildItem(
-                    ItemsManager.Instance.itemsInfo[itemType][itemGradeType].prefab);
+                    ItemsManager.Instance.itemsInfo[itemType][itemGradeType].prefab,
+                    itemTransform.position);
     }
 
     public void OnPointerEnter(PointerEventData eventData)

@@ -24,6 +24,19 @@ public class IItem: MonoBehaviour
 
     public void UpdateHeatBar()
     {
-        hpBar.value = hpBar.maxValue - heat;
+        if (hpBar != null)
+        {
+            if(heat == 0)
+            {
+                hpBar.gameObject.SetActive(false);
+            }
+            else
+            {
+                hpBar.gameObject.SetActive(true);
+                hpBar.value = heat;
+            }
+
+        }
+            
     }
 }

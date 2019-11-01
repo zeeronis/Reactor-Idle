@@ -33,23 +33,27 @@ public class PoolManager : MonoBehaviour
         {
             slider = poolHpSliders[0];
             slider.transform.position = position - new Vector2(0, 0.9f);
-            slider.gameObject.SetActive(true);
             poolHpSliders.Remove(slider);
         }
         else
         {
             slider = ItemsManager.Instance.GetSliderObject(position);
+            slider.gameObject.SetActive(false);
         }
         return slider;
     }
 
-    internal void ReturnToPool(IItem item)
+    internal void ReturnItemToPool(IItem item)
     {
         item.currentlyInUse = false;
-        item.hpBar.gameObject.SetActive(false);
         item.gameObject.SetActive(false);
-        poolHpSliders.Add(item.hpBar);
-        item.hpBar = null;
+
+        if(item.hpBar != null)
+        {
+            item.hpBar.gameObject.SetActive(false);
+            poolHpSliders.Add(item.hpBar);
+            item.hpBar = null;
+        }
     }
 
     internal IItem GetItemObject(ItemType itemType, int itemGrade, Vector3 position, Transform parentTransform)
@@ -60,17 +64,26 @@ public class PoolManager : MonoBehaviour
             {
                 item.currentlyInUse = true;
                 item.transform.position = position;
-                item.hpBar = GetHpSlider(position);
-                item.gameObject.SetActive(true);
-                if(itemType == ItemType.Rod)
+                if (itemType != ItemType.Battery && itemType != ItemType.HeatPlate)
+                {
+                    item.hpBar = GetHpSlider(position);
+                }
+                if (itemType == ItemType.Rod)
+                {
                     item.GetComponent<SpriteRenderer>().color = new Color32(255, 255, 255, 255);
+                    item.hpBar.gameObject.SetActive(true);
+                }
+                item.gameObject.SetActive(true);
                 return item;
             }
         }
         IItem newItem = Instantiate(ItemsManager.Instance.itemsInfo[itemType][itemGrade].prefab,
                                     position, Quaternion.identity, parentTransform).GetComponent<IItem>();
         poolItems[itemType].Add(newItem);
-        newItem.hpBar = GetHpSlider(position);
+        if (itemType != ItemType.Battery && itemType != ItemType.HeatPlate)
+        {
+            newItem.hpBar = GetHpSlider(position);
+        }
         newItem.currentlyInUse = true;
         return newItem;
     }

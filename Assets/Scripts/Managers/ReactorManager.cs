@@ -35,6 +35,10 @@ public class ReactorManager : MonoBehaviour
     private float updateRate = 0.5f;
     private float nextUpdateTime = 0;
 
+    [SerializeField]
+    private Transform preBuyItemSelected;
+    private int selectedItemTab = -1;
+    private int currentTab = 0;
     private GameObject preBuyItemPrefab;
     public bool buildMod = false;
 
@@ -64,7 +68,6 @@ public class ReactorManager : MonoBehaviour
             heatText.text = (int)heat + " / " + (int)MaxHeat;
         }
     }
-
     public float MaxPower
     {
         get { return maxPower; }
@@ -74,7 +77,6 @@ public class ReactorManager : MonoBehaviour
             powerBar.maxValue = maxPower;
         }
     }
-
     public float MaxHeat
     {
         get { return maxHeat; }
@@ -283,6 +285,7 @@ public class ReactorManager : MonoBehaviour
                 itemsDictionary[ItemType.Rod].Remove(cell);
                 usedRodList.Add(cell);
                 cell.cellItem.GetComponent<SpriteRenderer>().color = new Color32(255, 255, 255, 128);
+                cell.cellItem.hpBar.gameObject.SetActive(false);
                 cell.cellItem.durability = 0;
             }
             else
@@ -341,7 +344,7 @@ public class ReactorManager : MonoBehaviour
             MaxHeat -= info.durability;
         }
         itemsDictionary[cell.cellItem.ItemType].Remove(cell);
-        PoolManager.Instance.ReturnToPool(cell.cellItem);
+        PoolManager.Instance.ReturnItemToPool(cell.cellItem);
         cell.cellItem = null;
     }
 
@@ -374,16 +377,24 @@ public class ReactorManager : MonoBehaviour
         Power = 0;
     }
 
-    public void MovePreBuyItem(Vector2 position, bool isEmptyCell)
+    public void ShopTabChanged(int tabIndex)
     {
-        preBuyItemPrefab.transform.position = position;
-        preBuyItemPrefab.GetComponent<SpriteRenderer>().color = isEmptyCell ?
-            new Color32(255, 255, 255, 255) : new Color32(255, 131, 131, 131);
-
+        currentTab = tabIndex;
+        if(currentTab == selectedItemTab)
+        {
+            preBuyItemSelected.gameObject.SetActive(true);
+        }
+        else
+        {
+            preBuyItemSelected.gameObject.SetActive(false);
+        }
     }
 
-    public void SelectPreBuildItem(GameObject prefab)
+    public void SelectPreBuildItem(GameObject prefab, Vector2 shopItemPos)
     {
+        selectedItemTab = currentTab;
+        preBuyItemSelected.gameObject.SetActive(true);
+        preBuyItemSelected.position = shopItemPos;
         preBuyItemPrefab = prefab;
         buildMod = true;
     }
@@ -427,8 +438,12 @@ public class ReactorManager : MonoBehaviour
                 item = PoolManager.Instance.GetItemObject(item.ItemType, item.itemGradeType,
                                                               position, transform);
                 item.durability = itemInfo.durability;
-                item.hpBar.maxValue = item.durability;
-                item.hpBar.value = item.durability;
+                item.heat = 0;
+                if(item.hpBar != null)
+                {
+                    item.hpBar.maxValue = item.durability;
+                    item.hpBar.value = item.durability;
+                }
                 cell.cellItem = item;
 
                 itemsDictionary[item.ItemType].Add(cell);
