@@ -41,6 +41,8 @@ public class ItemsManager: MonoBehaviour
     public ItemInfoPanel itemInfoPanel;
     [HideInInspector]
     public Dictionary<ItemType, ItemInfo[]> itemsInfo = new Dictionary<ItemType, ItemInfo[]>();
+    [HideInInspector]
+    public Dictionary<UpgradeType, UpgradeInfo> upgradesInfo = new Dictionary<UpgradeType, UpgradeInfo>();
 
     private void Start()
     {
@@ -67,6 +69,12 @@ public class ItemsManager: MonoBehaviour
             itemsInfo[ItemType.HeatVent][i].prefab = ventPrefabs[i];
             itemsInfo[ItemType.Battery][i].prefab = BatteryPrefabs[i];
             itemsInfo[ItemType.HeatPlate][i].prefab = heatPlatePrefabs[i];
+        }
+
+        asset = Resources.Load("Upgrades") as TextAsset;
+        using (Stream stream = new MemoryStream(asset.bytes))
+        {
+            upgradesInfo = (Dictionary<UpgradeType, UpgradeInfo>)formatter.Deserialize(stream);
         }
 
         itemInfoPanel = Instantiate(itemInfoPanelPrefab, Vector3.zero, Quaternion.identity, UICanvasTransform).GetComponent<ItemInfoPanel>();

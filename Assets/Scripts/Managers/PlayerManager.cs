@@ -34,6 +34,16 @@ public class PlayerManager : MonoBehaviour
         if (Instance == null)
             Instance = this;
 
-        Money = 1000000;
+        Money = 10;
+    }
+
+    public void Save()
+    {
+
+    }
+
+    public void Load()
+    {
+
     }
 }

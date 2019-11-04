@@ -98,15 +98,20 @@ public class ReactorManager : MonoBehaviour
         CreateGrid(new Vector2(4, 4), new Vector2(-10, -5));
     }
 
-    /* Update tasks
-     ================
-     = Rods
-     = Pipes
-     = Vents
-     = Check Durability/Heat (for destroy)
-     = UI  
-     ================
-    */
+    private static float Recfact(float start, float n)
+    {
+        float i;
+        if (n <= 16)
+        {
+            float r = start;
+            for (i = start + 1; i < start + n; i++) r *= i;
+            return r;
+        }
+        i = n / 2;
+        return Recfact(start, i) * Recfact(start + i, n - i);
+    }
+    public static float Factorial(float n) { return Recfact(1, n); }
+
     private List<IItem> _selectedItems = new List<IItem>();
     private List<Cell> _destroyList = new List<Cell>();
     private Cell _selectedCell;
