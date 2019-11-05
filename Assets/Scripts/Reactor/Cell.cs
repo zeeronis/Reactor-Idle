@@ -7,13 +7,13 @@ public class Cell : MonoBehaviour
     public Vector2 cellIndex;
     public IItem cellItem;
 
-    private Vector3 mousePosition;
+    private static Cell mouseDownCell;
     private bool isBuildAction;
 
 
     private void OnMouseDown()
     {
-        mousePosition = Input.mousePosition;
+        mouseDownCell = this;
         if (cellItem == null)
         {
             isBuildAction = true;
@@ -26,7 +26,7 @@ public class Cell : MonoBehaviour
 
     private void OnMouseUp()
     {
-        if (mousePosition == Input.mousePosition)
+        if (mouseDownCell == this)
         {
             if (isBuildAction && ReactorManager.Instance.buildMod)
             {

@@ -35,6 +35,7 @@ public class PlayerManager : MonoBehaviour
         if (Instance == null)
             Instance = this;
 
+        Screen.SetResolution(840, 480, FullScreenMode.Windowed);
         NewGame();
     }
 
@@ -51,7 +52,7 @@ public class PlayerManager : MonoBehaviour
         Money = 10;
 
         //DEBUG Value
-        Money = 10000;
+        Money = float.MaxValue;
     }
 
     internal bool BuyUpgrade(UpgradeType upgradeType)

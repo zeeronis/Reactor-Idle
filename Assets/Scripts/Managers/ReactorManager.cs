@@ -40,6 +40,26 @@ public class ReactorManager : MonoBehaviour
     private Transform preBuyItemSelected;
     private int selectedItemTab = -1;
     private int currentTab = 0;
+    private bool isEmpty;
+    private bool IsEmpty
+    {
+        get
+        {
+            return isEmpty;
+        }
+        set
+        {
+            isEmpty = value;
+            if (isEmpty)
+            {
+                //show clicker btn
+            }
+            else
+            {
+                //hide
+            }
+        }
+    }
     private GameObject preBuyItemPrefab;
     public bool buildMod = false;
 
@@ -53,7 +73,7 @@ public class ReactorManager : MonoBehaviour
         {
             power = value <= MaxPower ? value: MaxPower;
             powerBar.value = value;
-            powerText.text = (int)power + " / " + (int)MaxPower;
+            powerText.text = power + " / " + MaxPower;
         }
     }
     public float Heat
@@ -66,7 +86,7 @@ public class ReactorManager : MonoBehaviour
         {
             heat = value <= MaxHeat ? value : MaxHeat;
             heatBar.value = value;
-            heatText.text = (int)heat + " / " + (int)MaxHeat;
+            heatText.text = heat + " / " + MaxHeat;
         }
     }
     public float MaxPower
@@ -88,6 +108,8 @@ public class ReactorManager : MonoBehaviour
         }
     }
 
+
+
     private void Start()
     {
         if (Instance == null)
@@ -95,6 +117,7 @@ public class ReactorManager : MonoBehaviour
 
         MaxHeat = 100;
         MaxPower = 100;
+        IsEmpty = true;
 
         CreateGrid(new Vector2(4, 4), new Vector2(-10, -5));
     }
@@ -135,6 +158,7 @@ public class ReactorManager : MonoBehaviour
                     DestroyItem(itemsDictionary[(ItemType)i][j], true);
                 }
             }
+            IsEmpty = true;
             return;
         }
 
@@ -310,7 +334,7 @@ public class ReactorManager : MonoBehaviour
         {
             for (int i = 0; i < usedRodsList.Count; i++)
             {
-                //
+                //ЯЯЯЯ
             }
         }
 
@@ -361,6 +385,7 @@ public class ReactorManager : MonoBehaviour
 
     private void DestroyItem(Cell cell, bool explosion)
     {
+        itemsDictionary[cell.cellItem.ItemType].Remove(cell);
         if (explosion)
         {
             Vector3 position = cell.transform.position;
@@ -371,15 +396,14 @@ public class ReactorManager : MonoBehaviour
         {
             ItemInfo itemInfo = ItemsManager.Instance.itemsInfo[cell.cellItem.ItemType][cell.cellItem.itemGradeType];
             float durability = itemInfo.durability * GetItemDurabilityMultipler(cell.cellItem.ItemType, cell.cellItem.itemGradeType);
-            MaxPower -= durability;
+            CalcMaxPower();
         }
         if(cell.cellItem.ItemType == ItemType.HeatPlate)
         {
             ItemInfo itemInfo = ItemsManager.Instance.itemsInfo[cell.cellItem.ItemType][cell.cellItem.itemGradeType];
             float durability = itemInfo.durability * GetItemDurabilityMultipler(cell.cellItem.ItemType, cell.cellItem.itemGradeType);
-            MaxHeat -= durability;
+            CalcMaxHeat();
         }
-        itemsDictionary[cell.cellItem.ItemType].Remove(cell);
         PoolManager.Instance.ReturnItemToPool(cell.cellItem);
         cell.cellItem = null;
     }
@@ -487,6 +511,12 @@ public class ReactorManager : MonoBehaviour
         }
         
         DestroyItem(cell, false);
+        foreach (var item in itemsDictionary)
+        {
+            if (item.Value.Count != 0)
+                return;
+        }
+        IsEmpty = true;
     }
 
     internal void BuyItem(Vector2 cellIndex)
@@ -498,6 +528,7 @@ public class ReactorManager : MonoBehaviour
             ItemInfo itemInfo = ItemsManager.Instance.itemsInfo[item.ItemType][item.itemGradeType];
             if(itemInfo.cost <= PlayerManager.Instance.Money)
             {
+                IsEmpty = false;
                 PlayerManager.Instance.Money -= itemInfo.cost;
 
                 Vector3 position = cell.transform.position;
