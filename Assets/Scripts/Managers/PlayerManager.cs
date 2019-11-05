@@ -51,7 +51,7 @@ public class PlayerManager : MonoBehaviour
         Money = 10;
 
         //DEBUG Value
-        //Money = 10000;
+        Money = 10000;
     }
 
     internal bool BuyUpgrade(UpgradeType upgradeType)

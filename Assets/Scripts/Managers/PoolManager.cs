@@ -83,6 +83,7 @@ public class PoolManager : MonoBehaviour
         if (itemType != ItemType.Battery && itemType != ItemType.HeatPlate)
         {
             newItem.hpBar = GetHpSlider(position);
+            if (itemType == ItemType.Rod) newItem.hpBar.gameObject.SetActive(true);
         }
         newItem.currentlyInUse = true;
         return newItem;
