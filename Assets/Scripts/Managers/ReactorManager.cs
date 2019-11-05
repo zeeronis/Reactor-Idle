@@ -17,6 +17,7 @@ public class ReactorManager : MonoBehaviour
     private float heat;
     private float maxPower;
     private float maxHeat;
+    private bool autoReplaceMode;
 
     private Cell[,] cellsGrid;
     private Dictionary<ItemType, List<Cell>> itemsDictionary = new Dictionary<ItemType, List<Cell>>()
@@ -27,7 +28,7 @@ public class ReactorManager : MonoBehaviour
         [ItemType.HeatPlate] = new List<Cell>(),
         [ItemType.Battery] = new List<Cell>(),
     };
-    private List<Cell> usedRodList = new List<Cell>();
+    private List<Cell> usedRodsList = new List<Cell>();
     [SerializeField]
     private GameObject cellPrefab;
     private const float cellOffset = 2.5603f;
@@ -143,11 +144,13 @@ public class ReactorManager : MonoBehaviour
         float addHeat = 0;
         float addPower = 0;
         float rodMultipler;
+        float upgradeEffMultipler = 1;
 
         //Rods
         foreach (var cell in itemsDictionary[ItemType.Rod])
         {
             rodMultipler = 1;
+            upgradeEffMultipler = GetRodEffMultipler(cell.cellItem.itemGradeType);
             _selectedItems.Clear();
             if (cell.cellIndex.y > 0) //up
             {
@@ -189,7 +192,7 @@ public class ReactorManager : MonoBehaviour
             {
                 addHeat += rodInfo.outHeat * rodMultipler;
             }
-            addPower += rodInfo.outPower * rodMultipler;
+            addPower += (rodInfo.outPower * upgradeEffMultipler) * rodMultipler;
 
             //destroy rod check
             if(cell.cellItem.durability <= 0)
@@ -200,6 +203,7 @@ public class ReactorManager : MonoBehaviour
 
 
         //Pipes
+        upgradeEffMultipler = 1 + PlayerManager.Instance.player.upgrades[UpgradeType.Pipe_Eff];
         foreach (var cell in itemsDictionary[ItemType.HeatPipe])
         {
             if(cell.cellItem.heat != 0)
@@ -238,15 +242,16 @@ public class ReactorManager : MonoBehaviour
                 if (_selectedItems.Count != 0)
                 {
                     float heatPerCell = 0;
-                    if(cell.cellItem.heat <= pipeInfo.heatThroughput)
+                    float heatThroughput = pipeInfo.heatThroughput * upgradeEffMultipler;
+                    if (cell.cellItem.heat <= heatThroughput)
                     {
                         heatPerCell = cell.cellItem.heat / _selectedItems.Count;
                         cell.cellItem.heat = 0;
                     }
                     else
                     {
-                        heatPerCell = pipeInfo.heatThroughput / _selectedItems.Count;
-                        cell.cellItem.heat -= pipeInfo.heatThroughput;
+                        heatPerCell = heatThroughput / _selectedItems.Count;
+                        cell.cellItem.heat -= heatThroughput;
                     }
 
                     foreach (var item in _selectedItems)
@@ -266,10 +271,11 @@ public class ReactorManager : MonoBehaviour
 
 
         //Vents
+        upgradeEffMultipler = 1 + PlayerManager.Instance.player.upgrades[UpgradeType.Vent_Eff];
         foreach (var cell in itemsDictionary[ItemType.HeatVent])
         {
             HeatVentInfo pipeInfo = (HeatVentInfo)ItemsManager.Instance.itemsInfo[cell.cellItem.ItemType][cell.cellItem.itemGradeType];
-            cell.cellItem.heat -= pipeInfo.decreaseHeat;
+            cell.cellItem.heat -= pipeInfo.decreaseHeat * upgradeEffMultipler;
             if (cell.cellItem.heat < 0)
                 cell.cellItem.heat = 0;
             cell.cellItem.UpdateHeatBar();
@@ -288,7 +294,7 @@ public class ReactorManager : MonoBehaviour
             if (cell.cellItem.ItemType == ItemType.Rod)
             {
                 itemsDictionary[ItemType.Rod].Remove(cell);
-                usedRodList.Add(cell);
+                usedRodsList.Add(cell);
                 cell.cellItem.GetComponent<SpriteRenderer>().color = new Color32(255, 255, 255, 128);
                 cell.cellItem.hpBar.gameObject.SetActive(false);
                 cell.cellItem.durability = 0;
@@ -299,17 +305,40 @@ public class ReactorManager : MonoBehaviour
             }
         }
 
-
+        //AutoReplace rods
+        if (autoReplaceMode)
+        {
+            for (int i = 0; i < usedRodsList.Count; i++)
+            {
+                //
+            }
+        }
 
         //UI//Heat//Energy
         Heat += addHeat;
         Power += addPower;
         PlayerManager.Instance.Money += addMoney;
 
-
         //DEBUG
         sw.Stop();
         Debug.Log("ticks: " + sw.ElapsedTicks);
+    }
+
+    private float GetRodEffMultipler(int gradeType)
+    {
+        if (gradeType < 3)
+            return 1 + PlayerManager.Instance.player.upgrades[UpgradeType.RodGreen_PowerEff];
+        if (gradeType < 6)
+            return 1 + PlayerManager.Instance.player.upgrades[UpgradeType.RodYellow_PowerEff];
+        if (gradeType < 9)
+            return 1 + PlayerManager.Instance.player.upgrades[UpgradeType.RodBlue_PowerEff];
+        if (gradeType < 12)
+            return 1 + PlayerManager.Instance.player.upgrades[UpgradeType.RodPurple_PowerEff];
+        if (gradeType < 15)
+            return 1 + PlayerManager.Instance.player.upgrades[UpgradeType.RodRed_PowerEff];
+        if (gradeType < 18)
+            return 1 + PlayerManager.Instance.player.upgrades[UpgradeType.RodOrange_PowerEff];
+        return 1;
     }
 
     private void CheckSelectedCell()
@@ -340,13 +369,15 @@ public class ReactorManager : MonoBehaviour
         }
         if(cell.cellItem.ItemType == ItemType.Battery)
         {
-            ItemInfo info = ItemsManager.Instance.itemsInfo[cell.cellItem.ItemType][cell.cellItem.itemGradeType];
-            MaxPower -= info.durability;
+            ItemInfo itemInfo = ItemsManager.Instance.itemsInfo[cell.cellItem.ItemType][cell.cellItem.itemGradeType];
+            float durability = itemInfo.durability * GetItemDurabilityMultipler(cell.cellItem.ItemType, cell.cellItem.itemGradeType);
+            MaxPower -= durability;
         }
         if(cell.cellItem.ItemType == ItemType.HeatPlate)
         {
-            ItemInfo info = ItemsManager.Instance.itemsInfo[cell.cellItem.ItemType][cell.cellItem.itemGradeType];
-            MaxHeat -= info.durability;
+            ItemInfo itemInfo = ItemsManager.Instance.itemsInfo[cell.cellItem.ItemType][cell.cellItem.itemGradeType];
+            float durability = itemInfo.durability * GetItemDurabilityMultipler(cell.cellItem.ItemType, cell.cellItem.itemGradeType);
+            MaxHeat -= durability;
         }
         itemsDictionary[cell.cellItem.ItemType].Remove(cell);
         PoolManager.Instance.ReturnItemToPool(cell.cellItem);
@@ -370,19 +401,51 @@ public class ReactorManager : MonoBehaviour
         }
     }
 
+    private float GetItemDurabilityMultipler(ItemType itemType, int itemGrade)
+    {
+        switch (itemType)
+        {
+            case ItemType.Rod:
+                if(itemGrade < 3)
+                    return (PlayerManager.Instance.player.upgrades[UpgradeType.RodGreen_Durability] + 1);
+                if (itemGrade < 6)
+                    return (PlayerManager.Instance.player.upgrades[UpgradeType.RodBlue_Durability] + 1);
+                if (itemGrade < 9)
+                    return (PlayerManager.Instance.player.upgrades[UpgradeType.RodBlue_Durability] + 1);
+                if (itemGrade < 12)
+                    return (PlayerManager.Instance.player.upgrades[UpgradeType.RodBlue_Durability] + 1);
+                if (itemGrade < 15)
+                    return (PlayerManager.Instance.player.upgrades[UpgradeType.RodBlue_Durability] + 1);
+                if (itemGrade < 18)
+                    return (PlayerManager.Instance.player.upgrades[UpgradeType.RodBlue_Durability] + 1);
+                return 1;
+            case ItemType.HeatPipe:
+                return (PlayerManager.Instance.player.upgrades[UpgradeType.Pipe_Durability] + 1);
+            case ItemType.HeatVent:
+                return (PlayerManager.Instance.player.upgrades[UpgradeType.Vent_Durability] + 1);
+            case ItemType.HeatPlate:
+                return (PlayerManager.Instance.player.upgrades[UpgradeType.Plate_Durability] + 1);
+            case ItemType.Battery:
+                return (PlayerManager.Instance.player.upgrades[UpgradeType.Battery_Durability] + 1);
 
-    public void DecreaseHeatClick()
+            default:
+                return 1;
+        }
+    }
+
+
+    internal void DecreaseHeatClick()
     {
         if(heat > 0) Heat--;
     }
 
-    public void SellEnergyClick()
+    internal void SellEnergyClick()
     {
         PlayerManager.Instance.Money += power;
         Power = 0;
     }
 
-    public void ShopTabChanged(int tabIndex)
+    internal void ShopTabChanged(int tabIndex)
     {
         currentTab = tabIndex;
         if(currentTab == selectedItemTab)
@@ -395,7 +458,7 @@ public class ReactorManager : MonoBehaviour
         }
     }
 
-    public void SelectPreBuildItem(GameObject prefab, Vector2 shopItemPos)
+    internal void SelectPreBuildItem(GameObject prefab, Vector2 shopItemPos)
     {
         selectedItemTab = currentTab;
         preBuyItemSelected.gameObject.SetActive(true);
@@ -404,7 +467,7 @@ public class ReactorManager : MonoBehaviour
         buildMod = true;
     }
 
-    public void SellItem(Cell cell)
+    internal void SellItem(Cell cell)
     {
         ItemInfo itemInfo = ItemsManager.Instance.itemsInfo[cell.cellItem.ItemType][cell.cellItem.itemGradeType];
         if (cell.cellItem.ItemType == ItemType.Rod)
@@ -426,12 +489,11 @@ public class ReactorManager : MonoBehaviour
         DestroyItem(cell, false);
     }
 
-    public void BuyItem(Vector2 cellIndex)
+    internal void BuyItem(Vector2 cellIndex)
     {
         Cell cell = cellsGrid[(int)cellIndex.x, (int)cellIndex.y];
         if (cell.cellItem == null || cell.cellItem.durability == 0)
         {
-
             IItem item = preBuyItemPrefab.GetComponent<IItem>();
             ItemInfo itemInfo = ItemsManager.Instance.itemsInfo[item.ItemType][item.itemGradeType];
             if(itemInfo.cost <= PlayerManager.Instance.Money)
@@ -441,24 +503,49 @@ public class ReactorManager : MonoBehaviour
                 Vector3 position = cell.transform.position;
                 position.z = 0;
                 item = PoolManager.Instance.GetItemObject(item.ItemType, item.itemGradeType,
-                                                              position, transform);
-                item.durability = itemInfo.durability;
+                                                          position, transform);
+
+                float durability = itemInfo.durability * GetItemDurabilityMultipler(item.ItemType, item.itemGradeType);
+                item.durability = durability;
                 item.heat = 0;
                 if(item.hpBar != null)
                 {
                     item.hpBar.maxValue = item.durability;
                     item.hpBar.value = item.durability;
                 }
-                cell.cellItem = item;
 
+                cell.cellItem = item;
                 itemsDictionary[item.ItemType].Add(cell);
 
                 if (cell.cellItem.ItemType == ItemType.Battery)
-                    MaxPower += itemInfo.durability;
+                    MaxPower += durability;
                 if (cell.cellItem.ItemType == ItemType.HeatPlate)
-                    MaxHeat += itemInfo.durability;
+                    MaxHeat += durability;
             }
         }
     }
 
+    internal void CalcMaxHeat()
+    {
+        float maxHeat = 100;
+        foreach (var item in itemsDictionary[ItemType.HeatPlate])
+        {
+            maxHeat += ItemsManager.Instance
+                .itemsInfo[item.cellItem.ItemType][item.cellItem.itemGradeType].durability 
+                * GetItemDurabilityMultipler(item.cellItem.ItemType,item.cellItem.itemGradeType);
+        }
+        MaxHeat = maxHeat;
+    }
+
+    internal void CalcMaxPower()
+    {
+        float maxPower = 100;
+        foreach (var item in itemsDictionary[ItemType.Battery])
+        {
+            maxPower += ItemsManager.Instance
+                .itemsInfo[item.cellItem.ItemType][item.cellItem.itemGradeType].durability
+                * GetItemDurabilityMultipler(item.cellItem.ItemType, item.cellItem.itemGradeType);
+        }
+        MaxPower = maxPower;
+    }
 }

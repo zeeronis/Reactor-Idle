@@ -12,7 +12,18 @@ public class RodInfo: ItemInfo
 
     internal override string GetLocaleDesc(string nonFormattedText)
     {
-        return string.Format(nonFormattedText, outPower, outHeat);
+        UpgradeType upgradeType;
+        int gradeType = prefab.GetComponent<IItem>().itemGradeType;
+
+        if (gradeType < 3) upgradeType = UpgradeType.RodGreen_PowerEff;
+        else if (gradeType < 6) upgradeType = UpgradeType.RodYellow_PowerEff;
+        else if (gradeType < 9) upgradeType = UpgradeType.RodBlue_PowerEff;
+        else if (gradeType < 12) upgradeType = UpgradeType.RodPurple_PowerEff;
+        else if (gradeType < 15) upgradeType = UpgradeType.RodRed_PowerEff;
+        else upgradeType = UpgradeType.RodOrange_PowerEff;
+
+        return string.Format(nonFormattedText, outPower * (1 + PlayerManager.Instance.player.upgrades[upgradeType]), 
+                                               outHeat);
     }
 }
 

@@ -11,7 +11,7 @@ public class HeatVentInfo: ItemInfo
 
     internal override string GetLocaleDesc(string nonFormattedText)
     {
-        return string.Format(nonFormattedText, decreaseHeat);
+        return string.Format(nonFormattedText, decreaseHeat * (1 + PlayerManager.Instance.player.upgrades[UpgradeType.Vent_Eff]));
     }
 }
 

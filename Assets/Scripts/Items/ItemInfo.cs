@@ -18,6 +18,10 @@ public class ItemInfo
 
     internal virtual string GetLocaleDesc(string nonFormattedText)
     {
-        return string.Format(nonFormattedText, durability);
+        return string.Format(nonFormattedText, 
+            durability * (1 + PlayerManager.Instance.player.upgrades[
+                prefab.GetComponent<IItem>().ItemType == ItemType.Battery 
+                ? UpgradeType.Battery_Durability 
+                : UpgradeType.Plate_Durability]));
     }
 }

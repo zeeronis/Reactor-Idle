@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,22 +11,22 @@ public class PlayerManager : MonoBehaviour
 
     [SerializeField]
     private Text moneyText;
-    private float money;
-
     private bool pauseMode;
 
+    public Player player;
     public float Money
     {
         get
         {
-            return money;
+            return player.money;
         }
         set
         {
-            money = value;
+            player.money = value;
             moneyText.text = value.ToString() + " $";
         }
     }
+
     public bool PauseMode { get => pauseMode; set => pauseMode = value; }
 
 
@@ -34,15 +35,46 @@ public class PlayerManager : MonoBehaviour
         if (Instance == null)
             Instance = this;
 
-        Money = 10;
+        NewGame();
     }
 
-    public void Save()
+    private void NewGame()
+    {
+        player = new Player
+        {
+            upgrades = new Dictionary<UpgradeType, int>()
+        };
+        foreach (UpgradeType type in System.Enum.GetValues(typeof(UpgradeType)))
+        {
+            player.upgrades.Add(type, 0);
+        }
+        Money = 10;
+
+        //DEBUG Value
+        //Money = 10000;
+    }
+
+    internal bool BuyUpgrade(UpgradeType upgradeType)
+    {
+        float upgradeCost = ItemsManager.Instance.upgradesInfo[upgradeType]
+                                .GetCost(player.upgrades[upgradeType]);
+        if (Money >= upgradeCost)
+        {
+            Money -= upgradeCost;
+            player.upgrades[upgradeType]++;
+            if (upgradeType == UpgradeType.Battery_Durability) ReactorManager.Instance.CalcMaxPower();
+            if (upgradeType == UpgradeType.Plate_Durability)   ReactorManager.Instance.CalcMaxHeat();
+            return true;
+        }
+        return false;
+    }
+
+    internal void Save()
     {
 
     }
 
-    public void Load()
+    internal void Load()
     {
 
     }

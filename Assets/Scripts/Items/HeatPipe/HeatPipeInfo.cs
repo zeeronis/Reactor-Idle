@@ -11,6 +11,6 @@ public class HeatPipeInfo: ItemInfo
 
     internal override string GetLocaleDesc(string nonFormattedText)
     {
-        return string.Format(nonFormattedText, heatThroughput);
+        return string.Format(nonFormattedText, heatThroughput * (1 + PlayerManager.Instance.player.upgrades[UpgradeType.Pipe_Eff]));
     }
 }
