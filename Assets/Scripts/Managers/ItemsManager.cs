@@ -13,6 +13,7 @@ public class ItemsManager: MonoBehaviour
 {
     private static ItemsManager instance;
     public static ItemsManager Instance { get => instance; private set => instance = value; }
+    public static bool IsReady { get; private set; }
 
     [SerializeField]
     private Transform worldCanvasTransform;
@@ -85,6 +86,8 @@ public class ItemsManager: MonoBehaviour
         rodPrefabs = null;
         pipePrefabs = null;
         ventPrefabs = null;
+
+        IsReady = true;
     }
 
     public Slider GetSliderObject(Vector2 position)

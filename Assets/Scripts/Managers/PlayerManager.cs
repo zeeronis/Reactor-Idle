@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,10 +10,10 @@ public class PlayerManager : MonoBehaviour
 {
     private static PlayerManager instance;
     public static PlayerManager Instance { get => instance; private set => instance = value; }
+    public static bool IsReady { get; private set; }
 
     [SerializeField]
     private Text moneyText;
-    private bool pauseMode;
 
     public Player player;
     public float Money
@@ -27,7 +29,7 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    public bool PauseMode { get => pauseMode; set => pauseMode = value; }
+    public bool PauseMode { get => player.pauseMode; set => player.pauseMode = value; }
 
 
     private void Start()
@@ -36,14 +38,25 @@ public class PlayerManager : MonoBehaviour
             Instance = this;
 
         Screen.SetResolution(840, 480, FullScreenMode.Windowed);
-        NewGame();
+    }
+
+    private void FixedUpdate()
+    {
+        if (IsReady) return;
+
+        if (ItemsManager.IsReady && PoolManager.IsReady && ReactorManager.IsReady)
+        {
+            NewGame();
+            IsReady = true;
+        }
     }
 
     private void NewGame()
     {
         player = new Player
         {
-            upgrades = new Dictionary<UpgradeType, int>()
+            upgrades = new Dictionary<UpgradeType, int>(),
+            reactor = new Reactor()
         };
         foreach (UpgradeType type in System.Enum.GetValues(typeof(UpgradeType)))
         {
@@ -51,8 +64,11 @@ public class PlayerManager : MonoBehaviour
         }
         Money = 10;
 
+        ReactorManager.Instance.InitReactor(player.reactor);
         //DEBUG Value
-        Money = float.MaxValue;
+        //Money = float.MaxValue;
+
+        IsReady = true;
     }
 
     internal bool BuyUpgrade(UpgradeType upgradeType)
@@ -72,11 +88,30 @@ public class PlayerManager : MonoBehaviour
 
     internal void Save()
     {
-
+        ReactorManager.Instance.SaveCells();
+        BinaryFormatter formatter = new BinaryFormatter();
+        Directory.CreateDirectory(Environment.GetFolderPath(
+                                  Environment.SpecialFolder.ApplicationData) 
+                                  + "/ReactorIdle");
+        using (FileStream fileStream = new FileStream(Environment.GetFolderPath(
+                                              Environment.SpecialFolder.ApplicationData) 
+                                              + "/ReactorIdle/pData.bytes", FileMode.OpenOrCreate))
+        {
+            formatter.Serialize(fileStream, player);
+        }
     }
 
     internal void Load()
     {
-
+        BinaryFormatter formatter = new BinaryFormatter();
+        using (FileStream fileStream = new FileStream(Environment.GetFolderPath(
+                                              Environment.SpecialFolder.ApplicationData)
+                                              + "/ReactorIdle/pData.bytes", FileMode.OpenOrCreate))
+        {
+            player = (Player)formatter.Deserialize(fileStream);
+        }
+        player.reactor.isLoadGame = true;
+        ReactorManager.Instance.InitReactor(player.reactor);
+        player.reactor.isLoadGame = false;
     }
 }

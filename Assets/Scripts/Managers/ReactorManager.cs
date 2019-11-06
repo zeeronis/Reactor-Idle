@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,14 +8,15 @@ public class ReactorManager : MonoBehaviour
 {
     private static ReactorManager instance;
     public static ReactorManager Instance { get => instance; private set => instance = value; }
+    public static bool IsReady { get; private set; }
 
     [SerializeField] private Slider powerBar;
     [SerializeField] private Slider heatBar;
     [SerializeField] private Text powerText;
     [SerializeField] private Text heatText;
+    [SerializeField] private Button buttonIncreaceMoney;
 
-    private float power;
-    private float heat;
+    private Reactor reactor;
     private float maxPower;
     private float maxHeat;
     private bool autoReplaceMode;
@@ -41,6 +43,7 @@ public class ReactorManager : MonoBehaviour
     private int selectedItemTab = -1;
     private int currentTab = 0;
     private bool isEmpty;
+
     private bool IsEmpty
     {
         get
@@ -50,13 +53,9 @@ public class ReactorManager : MonoBehaviour
         set
         {
             isEmpty = value;
-            if (isEmpty)
+            if (isEmpty && PlayerManager.Instance?.Money < 10)
             {
-                //show clicker btn
-            }
-            else
-            {
-                //hide
+                buttonIncreaceMoney.gameObject.SetActive(true);
             }
         }
     }
@@ -67,26 +66,26 @@ public class ReactorManager : MonoBehaviour
     {
         get
         {
-            return power;
+            return reactor.power;
         }
         private set
         {
-            power = value <= MaxPower ? value: MaxPower;
+            reactor.power = value <= MaxPower ? value: MaxPower;
             powerBar.value = value;
-            powerText.text = power + " / " + MaxPower;
+            powerText.text = reactor.power + " / " + MaxPower;
         }
     }
     public float Heat
     {
         get
         {
-            return heat;
+            return reactor.heat;
         }
         private set
         {
-            heat = value <= MaxHeat ? value : MaxHeat;
+            reactor.heat = value <= MaxHeat ? value : MaxHeat;
             heatBar.value = value;
-            heatText.text = heat + " / " + MaxHeat;
+            heatText.text = reactor.heat + " / " + MaxHeat;
         }
     }
     public float MaxPower
@@ -115,11 +114,7 @@ public class ReactorManager : MonoBehaviour
         if (Instance == null)
             Instance = this;
 
-        MaxHeat = 100;
-        MaxPower = 100;
-        IsEmpty = true;
-
-        CreateGrid(new Vector2(4, 4), new Vector2(-10, -5));
+        IsReady = true;
     }
 
     private static float Recfact(float start, float n)
@@ -142,14 +137,14 @@ public class ReactorManager : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (nextUpdateTime > Time.time || PlayerManager.Instance.PauseMode)
+        if (nextUpdateTime > Time.time || PlayerManager.Instance.PauseMode || !PlayerManager.IsReady)
             return;
 
         var sw = new System.Diagnostics.Stopwatch();
         sw.Start();
 
         _destroyList.Clear();
-        if (heat == MaxHeat)
+        if (reactor.heat == MaxHeat)
         {
             for (int i = 0; i < itemsDictionary.Count; i++)
             {
@@ -334,7 +329,7 @@ public class ReactorManager : MonoBehaviour
         {
             for (int i = 0; i < usedRodsList.Count; i++)
             {
-                //ЯЯЯЯ
+                //
             }
         }
 
@@ -421,6 +416,15 @@ public class ReactorManager : MonoBehaviour
                                                  gameObject.transform)
                                                  .GetComponent<Cell>();
                 cellsGrid[row, column].cellIndex = new Vector2(row, column);
+                if(reactor.isLoadGame)
+                {
+                    if(reactor.serializableCells[row,column] != null)
+                    {
+                        SetItem(cellsGrid[row, column],
+                                reactor.serializableCells[row, column],
+                                false);
+                    }
+                }
             }
         }
     }
@@ -457,15 +461,62 @@ public class ReactorManager : MonoBehaviour
         }
     }
 
+    private void SetItem(Cell cell, object item, bool isNew)
+    {
+        IsEmpty = false;
+        IItem newItem;
+        Vector3 position = cell.transform.position;
+        position.z = 0;
+
+        if (isNew)
+        {
+            newItem = PoolManager.Instance.GetItemObject((item as IItem).ItemType,
+                                                         (item as IItem).itemGradeType,
+                                                          position, transform);
+            ItemInfo itemInfo = ItemsManager.Instance.itemsInfo[(item as IItem).ItemType][(item as IItem).itemGradeType];
+            float durability = itemInfo.durability * GetItemDurabilityMultipler(newItem.ItemType, newItem.itemGradeType);
+            newItem.durability = durability;
+            newItem.heat = 0;
+
+            if (newItem.ItemType == ItemType.Battery)
+                MaxPower += durability;
+            if (newItem.ItemType == ItemType.HeatPlate)
+                MaxHeat += durability;
+        }
+        else
+        {
+            newItem = PoolManager.Instance.GetItemObject((item as SerializableCell).ItemType,
+                                                         (item as SerializableCell).itemGradeType,
+                                                          position, transform);
+            newItem.durability = (item as SerializableCell).durability;
+            newItem.heat = (item as SerializableCell).durability;
+        }
+
+
+        if (newItem.hpBar != null)
+        {
+            newItem.hpBar.maxValue = newItem.durability;
+            newItem.hpBar.value = newItem.durability;
+        }
+        cell.cellItem = newItem;
+        itemsDictionary[newItem.ItemType].Add(cell);
+    }
+
+    internal void IncreaceMoneyClick()
+    {
+        PlayerManager.Instance.Money++;
+        if (PlayerManager.Instance.Money >= 10)
+            buttonIncreaceMoney.gameObject.SetActive(false);
+    }
 
     internal void DecreaseHeatClick()
     {
-        if(heat > 0) Heat--;
+        if(reactor.heat > 0) Heat--;
     }
 
     internal void SellEnergyClick()
     {
-        PlayerManager.Instance.Money += power;
+        PlayerManager.Instance.Money += reactor.power;
         Power = 0;
     }
 
@@ -528,30 +579,8 @@ public class ReactorManager : MonoBehaviour
             ItemInfo itemInfo = ItemsManager.Instance.itemsInfo[item.ItemType][item.itemGradeType];
             if(itemInfo.cost <= PlayerManager.Instance.Money)
             {
-                IsEmpty = false;
                 PlayerManager.Instance.Money -= itemInfo.cost;
-
-                Vector3 position = cell.transform.position;
-                position.z = 0;
-                item = PoolManager.Instance.GetItemObject(item.ItemType, item.itemGradeType,
-                                                          position, transform);
-
-                float durability = itemInfo.durability * GetItemDurabilityMultipler(item.ItemType, item.itemGradeType);
-                item.durability = durability;
-                item.heat = 0;
-                if(item.hpBar != null)
-                {
-                    item.hpBar.maxValue = item.durability;
-                    item.hpBar.value = item.durability;
-                }
-
-                cell.cellItem = item;
-                itemsDictionary[item.ItemType].Add(cell);
-
-                if (cell.cellItem.ItemType == ItemType.Battery)
-                    MaxPower += durability;
-                if (cell.cellItem.ItemType == ItemType.HeatPlate)
-                    MaxHeat += durability;
+                SetItem(cell, item, true);
             }
         }
     }
@@ -578,5 +607,44 @@ public class ReactorManager : MonoBehaviour
                 * GetItemDurabilityMultipler(item.cellItem.ItemType, item.cellItem.itemGradeType);
         }
         MaxPower = maxPower;
+    }
+
+    internal void InitReactor(Reactor _reactor)
+    {
+        bool lastPauseMode = PlayerManager.Instance.PauseMode;
+        PlayerManager.Instance.PauseMode = true;
+
+        IsEmpty = true;
+        //get reactor info from ItemsManager
+        reactor = _reactor;
+        MaxHeat = 100;
+        MaxPower = 100;
+
+        CreateGrid(new Vector2(4, 4), new Vector2(-10, -5));//destroy last items/cells if generate new reactor
+        CalcMaxHeat();
+        CalcMaxPower();
+
+        PlayerManager.Instance.PauseMode = lastPauseMode;
+    }
+
+    internal void SaveCells()
+    {
+        reactor.serializableCells = new SerializableCell[cellsGrid.GetLength(0), cellsGrid.GetLength(1)];
+        for (int row = 0; row < cellsGrid.GetLength(0); row++)
+        {
+            for (int column = 0; column < cellsGrid.GetLength(1); column++)
+            {
+                if(cellsGrid[row, column].cellItem != null)
+                {
+                    reactor.serializableCells[row, column] = new SerializableCell()
+                    {
+                        ItemType = cellsGrid[row, column].cellItem.ItemType,
+                        itemGradeType = cellsGrid[row, column].cellItem.itemGradeType,
+                        heat = cellsGrid[row, column].cellItem.heat,
+                        durability = cellsGrid[row, column].cellItem.durability,
+                    };
+                }
+            }
+        }
     }
 }

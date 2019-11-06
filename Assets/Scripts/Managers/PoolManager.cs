@@ -8,6 +8,7 @@ public class PoolManager : MonoBehaviour
 {
     private static PoolManager instance;
     public static PoolManager Instance { get => instance; set => instance = value; }
+    public static bool IsReady { get; private set; }
 
     [SerializeField]
     private Dictionary<ItemType, List<IItem>> poolItems = new Dictionary<ItemType, List<IItem>>();
@@ -24,6 +25,8 @@ public class PoolManager : MonoBehaviour
         {
             poolItems.Add(itemType, new List<IItem>());
         }
+
+        IsReady = true;
     }
 
     private Slider GetHpSlider(Vector2 position)

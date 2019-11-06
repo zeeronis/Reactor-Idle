@@ -6,7 +6,8 @@ using UnityEngine;
 [Serializable]
 public class Player
 {
+    public bool pauseMode;
     public float money;
     public Dictionary<UpgradeType, int> upgrades;
-    //public Reactor reactor;
+    public Reactor reactor;
 }
