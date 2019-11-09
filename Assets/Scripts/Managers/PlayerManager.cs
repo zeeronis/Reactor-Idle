@@ -14,6 +14,10 @@ public class PlayerManager : MonoBehaviour
 
     [SerializeField]
     private Text moneyText;
+    [SerializeField]
+    private Button PauseButton;
+    [SerializeField]
+    private Button ResumeButton;
 
     public Player player;
     public float Money
@@ -29,7 +33,27 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    public bool PauseMode { get => player.pauseMode; set => player.pauseMode = value; }
+    public bool PauseMode
+    {
+        get
+        {
+            return player.pauseMode; 
+        }
+        set
+        {
+            player.pauseMode = value;
+            if(value)
+            {
+                PauseButton.gameObject.SetActive(false);
+                ResumeButton.gameObject.SetActive(true);
+            }
+            else
+            {
+                PauseButton.gameObject.SetActive(true);
+                ResumeButton.gameObject.SetActive(false);
+            }
+        }
+    }
 
 
     private void Start()
@@ -86,7 +110,7 @@ public class PlayerManager : MonoBehaviour
         return false;
     }
 
-    internal void Save()
+    public void Save()
     {
         ReactorManager.Instance.SaveCells();
         BinaryFormatter formatter = new BinaryFormatter();
@@ -101,7 +125,7 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    internal void Load()
+    public void Load()
     {
         BinaryFormatter formatter = new BinaryFormatter();
         using (FileStream fileStream = new FileStream(Environment.GetFolderPath(
@@ -113,5 +137,6 @@ public class PlayerManager : MonoBehaviour
         player.reactor.isLoadGame = true;
         ReactorManager.Instance.InitReactor(player.reactor);
         player.reactor.isLoadGame = false;
+        Money = player.money;
     }
 }

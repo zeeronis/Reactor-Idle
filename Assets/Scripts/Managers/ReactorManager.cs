@@ -53,7 +53,7 @@ public class ReactorManager : MonoBehaviour
         set
         {
             isEmpty = value;
-            if (isEmpty && PlayerManager.Instance?.Money < 10)
+            if (isEmpty && PlayerManager.Instance?.Money < 10 && Power == 0)
             {
                 buttonIncreaceMoney.gameObject.SetActive(true);
             }
@@ -489,17 +489,46 @@ public class ReactorManager : MonoBehaviour
                                                          (item as SerializableCell).itemGradeType,
                                                           position, transform);
             newItem.durability = (item as SerializableCell).durability;
-            newItem.heat = (item as SerializableCell).durability;
+            newItem.heat = (item as SerializableCell).heat;
+            newItem.itemGradeType = (item as SerializableCell).itemGradeType;
+            newItem.ItemType = (item as SerializableCell).ItemType;
         }
 
 
         if (newItem.hpBar != null)
         {
-            newItem.hpBar.maxValue = newItem.durability;
+            if (isNew)
+            {
+                newItem.hpBar.maxValue = newItem.durability;
+            }
+            else
+            {
+                newItem.hpBar.maxValue =  ItemsManager.Instance.itemsInfo[newItem.ItemType][newItem.itemGradeType]
+                                            .durability;
+            }
+
             newItem.hpBar.value = newItem.durability;
+            if(ItemType.Rod == newItem.ItemType)
+            {
+                newItem.UpdateDurabilityBar();
+            }
+            else
+            {
+                newItem.UpdateHeatBar();
+            }
         }
+
         cell.cellItem = newItem;
-        itemsDictionary[newItem.ItemType].Add(cell);
+        if(newItem.ItemType == ItemType.Rod && newItem.durability <= 0)
+        {
+            usedRodsList.Add(cell);
+            newItem.GetComponent<SpriteRenderer>().color = new Color32(255, 255, 255, 128);
+            newItem.hpBar.gameObject.SetActive(false);
+        }
+        else
+        {
+            itemsDictionary[newItem.ItemType].Add(cell);
+        }
     }
 
     internal void IncreaceMoneyClick()
@@ -614,11 +643,34 @@ public class ReactorManager : MonoBehaviour
         bool lastPauseMode = PlayerManager.Instance.PauseMode;
         PlayerManager.Instance.PauseMode = true;
 
+        //destroy last cells
+        if (cellsGrid != null)
+        {
+            usedRodsList.Clear();
+            foreach (ItemType itemType in Enum.GetValues(typeof(ItemType)))
+            {
+                itemsDictionary[itemType].Clear();
+            }
+            for (int row = 0; row < cellsGrid.GetLength(0); row++)
+            {
+                for (int column = 0; column < cellsGrid.GetLength(0); column++)
+                {
+                    if(cellsGrid[row, column].cellItem != null)
+                    {
+                        PoolManager.Instance.ReturnItemToPool(cellsGrid[row, column].cellItem);
+                    }
+                    Destroy(cellsGrid[row, column].gameObject);
+                }
+            }
+        }
         IsEmpty = true;
+
         //get reactor info from ItemsManager
         reactor = _reactor;
         MaxHeat = 100;
         MaxPower = 100;
+        Heat = reactor.heat;
+        Power = reactor.power;
 
         CreateGrid(new Vector2(4, 4), new Vector2(-10, -5));//destroy last items/cells if generate new reactor
         CalcMaxHeat();
