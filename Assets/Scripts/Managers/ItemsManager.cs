@@ -44,6 +44,8 @@ public class ItemsManager: MonoBehaviour
     public Dictionary<ItemType, ItemInfo[]> itemsInfo = new Dictionary<ItemType, ItemInfo[]>();
     [HideInInspector]
     public Dictionary<UpgradeType, UpgradeInfo> upgradesInfo = new Dictionary<UpgradeType, UpgradeInfo>();
+    [HideInInspector]
+    public ReactorInfo[] reactorsInfo;
 
     private void Start()
     {
@@ -76,6 +78,12 @@ public class ItemsManager: MonoBehaviour
         using (Stream stream = new MemoryStream(asset.bytes))
         {
             upgradesInfo = (Dictionary<UpgradeType, UpgradeInfo>)formatter.Deserialize(stream);
+        }
+
+        asset = Resources.Load("Reactors") as TextAsset;
+        using (Stream stream = new MemoryStream(asset.bytes))
+        {
+            reactorsInfo = (ReactorInfo[])formatter.Deserialize(stream);
         }
 
         itemInfoPanel = Instantiate(itemInfoPanelPrefab, Vector3.zero, Quaternion.identity, UICanvasTransform).GetComponent<ItemInfoPanel>();

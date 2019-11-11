@@ -80,7 +80,7 @@ public class PlayerManager : MonoBehaviour
         player = new Player
         {
             upgrades = new Dictionary<UpgradeType, int>(),
-            reactor = new Reactor()
+            reactor = new Reactor() { gradeType = 0 }
         };
         foreach (UpgradeType type in System.Enum.GetValues(typeof(UpgradeType)))
         {
@@ -88,7 +88,8 @@ public class PlayerManager : MonoBehaviour
         }
         Money = 10;
 
-        ReactorManager.Instance.InitReactor(player.reactor);
+        ReactorManager.Instance.InitReactor(player.reactor, false);
+        
         //DEBUG Value
         //Money = float.MaxValue;
 
@@ -134,9 +135,7 @@ public class PlayerManager : MonoBehaviour
         {
             player = (Player)formatter.Deserialize(fileStream);
         }
-        player.reactor.isLoadGame = true;
-        ReactorManager.Instance.InitReactor(player.reactor);
-        player.reactor.isLoadGame = false;
+        ReactorManager.Instance.InitReactor(player.reactor, true);
         Money = player.money;
     }
 }

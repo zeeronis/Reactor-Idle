@@ -5,10 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
+[Serializable]
 public class ReactorInfo
 {
     public float baseMaxPower;
     public float baseMaxHeat;
-    public Vector2 gridSize;
-    public Vector2 drawStartposition;
+    public int[] gridSize;
+    public float[] drawStartposition;
+
+    public float cost;
 }

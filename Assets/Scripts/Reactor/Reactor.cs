@@ -8,9 +8,6 @@ using UnityEngine;
 [Serializable]
 public class Reactor
 {
-    [NonSerialized]
-    public bool isLoadGame;
-
     public int gradeType;
     public float heat;
     public float power;

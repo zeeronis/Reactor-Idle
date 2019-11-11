@@ -403,7 +403,7 @@ public class ReactorManager : MonoBehaviour
         cell.cellItem = null;
     }
 
-    private void CreateGrid(Vector2 size, Vector2 startGridPoint)
+    private void CreateGrid(Vector2 size, Vector2 startGridPoint, bool isLoadGame)
     {
         cellsGrid = new Cell[(int)size.x, (int)size.y];
         for (int row = 0; row < size.x; row++)
@@ -416,7 +416,7 @@ public class ReactorManager : MonoBehaviour
                                                  gameObject.transform)
                                                  .GetComponent<Cell>();
                 cellsGrid[row, column].cellIndex = new Vector2(row, column);
-                if(reactor.isLoadGame)
+                if(isLoadGame)
                 {
                     if(reactor.serializableCells[row,column] != null)
                     {
@@ -616,7 +616,7 @@ public class ReactorManager : MonoBehaviour
 
     internal void CalcMaxHeat()
     {
-        float maxHeat = 100;
+        float maxHeat = ItemsManager.Instance.reactorsInfo[reactor.gradeType].baseMaxHeat;
         foreach (var item in itemsDictionary[ItemType.HeatPlate])
         {
             maxHeat += ItemsManager.Instance
@@ -628,7 +628,7 @@ public class ReactorManager : MonoBehaviour
 
     internal void CalcMaxPower()
     {
-        float maxPower = 100;
+        float maxPower = ItemsManager.Instance.reactorsInfo[reactor.gradeType].baseMaxPower;
         foreach (var item in itemsDictionary[ItemType.Battery])
         {
             maxPower += ItemsManager.Instance
@@ -638,7 +638,7 @@ public class ReactorManager : MonoBehaviour
         MaxPower = maxPower;
     }
 
-    internal void InitReactor(Reactor _reactor)
+    internal void InitReactor(Reactor _reactor, bool isLoadGame)
     {
         bool lastPauseMode = PlayerManager.Instance.PauseMode;
         PlayerManager.Instance.PauseMode = true;
@@ -665,14 +665,16 @@ public class ReactorManager : MonoBehaviour
         }
         IsEmpty = true;
 
-        //get reactor info from ItemsManager
         reactor = _reactor;
-        MaxHeat = 100;
-        MaxPower = 100;
+        ReactorInfo reactorInfo = ItemsManager.Instance.reactorsInfo[reactor.gradeType];
+        MaxHeat = reactorInfo.baseMaxHeat;
+        MaxPower = reactorInfo.baseMaxPower;
         Heat = reactor.heat;
         Power = reactor.power;
 
-        CreateGrid(new Vector2(4, 4), new Vector2(-10, -5));//destroy last items/cells if generate new reactor
+        CreateGrid(new Vector2(reactorInfo.gridSize[0], reactorInfo.gridSize[1]), 
+                   new Vector2(reactorInfo.drawStartposition[0], reactorInfo.drawStartposition[1]), 
+                   isLoadGame);
         CalcMaxHeat();
         CalcMaxPower();
 
