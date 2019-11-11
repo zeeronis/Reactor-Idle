@@ -663,14 +663,13 @@ public class ReactorManager : MonoBehaviour
                 }
             }
         }
-        IsEmpty = true;
-
         reactor = _reactor;
         ReactorInfo reactorInfo = ItemsManager.Instance.reactorsInfo[reactor.gradeType];
         MaxHeat = reactorInfo.baseMaxHeat;
         MaxPower = reactorInfo.baseMaxPower;
         Heat = reactor.heat;
         Power = reactor.power;
+        IsEmpty = true;
 
         CreateGrid(new Vector2(reactorInfo.gridSize[0], reactorInfo.gridSize[1]), 
                    new Vector2(reactorInfo.drawStartposition[0], reactorInfo.drawStartposition[1]), 

@@ -19,6 +19,9 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private Button ResumeButton;
 
+    private float nextSaveTime = 60f;
+    private float autoSaveDelay = 60f;
+
     public Player player;
     public float Money
     {
@@ -37,12 +40,12 @@ public class PlayerManager : MonoBehaviour
     {
         get
         {
-            return player.pauseMode; 
+            return player.pauseMode;
         }
         set
         {
             player.pauseMode = value;
-            if(value)
+            if (value)
             {
                 PauseButton.gameObject.SetActive(false);
                 ResumeButton.gameObject.SetActive(true);
@@ -66,12 +69,30 @@ public class PlayerManager : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (IsReady) return;
-
-        if (ItemsManager.IsReady && PoolManager.IsReady && ReactorManager.IsReady)
+        if (IsReady)
         {
-            NewGame();
-            IsReady = true;
+            if (Time.time > nextSaveTime)
+            {
+                nextSaveTime = Time.time + autoSaveDelay;
+                Save();
+            }
+        }
+        else
+        {
+            if (ItemsManager.IsReady && PoolManager.IsReady && ReactorManager.IsReady)
+            {
+                nextSaveTime = Time.time + autoSaveDelay;
+                if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
+                                + "/ReactorIdle/pData.bytes"))
+                {
+                    Load();
+                }
+                else
+                {
+                    NewGame();
+                }
+                IsReady = true;
+            }
         }
     }
 
@@ -82,14 +103,14 @@ public class PlayerManager : MonoBehaviour
             upgrades = new Dictionary<UpgradeType, int>(),
             reactor = new Reactor() { gradeType = 0 }
         };
-        foreach (UpgradeType type in System.Enum.GetValues(typeof(UpgradeType)))
+        foreach (UpgradeType type in Enum.GetValues(typeof(UpgradeType)))
         {
             player.upgrades.Add(type, 0);
         }
         Money = 10;
 
         ReactorManager.Instance.InitReactor(player.reactor, false);
-        
+
         //DEBUG Value
         //Money = float.MaxValue;
 
@@ -105,14 +126,45 @@ public class PlayerManager : MonoBehaviour
             Money -= upgradeCost;
             player.upgrades[upgradeType]++;
             if (upgradeType == UpgradeType.Battery_Durability) ReactorManager.Instance.CalcMaxPower();
-            if (upgradeType == UpgradeType.Plate_Durability)   ReactorManager.Instance.CalcMaxHeat();
+            if (upgradeType == UpgradeType.Plate_Durability) ReactorManager.Instance.CalcMaxHeat();
             return true;
         }
         return false;
     }
 
+    public void AutoSaveValueChanged(int index)
+    {
+        switch (index)
+        {
+            case 0:
+                autoSaveDelay = 60;
+                break;
+            case 1:
+                autoSaveDelay = 3 * 60;
+                break;
+            case 2:
+                autoSaveDelay = 5 * 60;
+                break;
+            case 3:
+                autoSaveDelay = 10 * 60;
+                break;
+            case 4:
+                autoSaveDelay = 20 * 60;
+                break;
+            case 5:
+                autoSaveDelay = 30 * 60;
+                break;
+
+            default:
+                autoSaveDelay = 60;
+                break;
+        }
+        nextSaveTime = Time.time + autoSaveDelay;
+    }
+
     public void Save()
     {
+        PauseMode = true;
         ReactorManager.Instance.SaveCells();
         BinaryFormatter formatter = new BinaryFormatter();
         Directory.CreateDirectory(Environment.GetFolderPath(
@@ -124,10 +176,12 @@ public class PlayerManager : MonoBehaviour
         {
             formatter.Serialize(fileStream, player);
         }
+        PauseMode = false;
     }
 
     public void Load()
     {
+        PauseMode = true;
         BinaryFormatter formatter = new BinaryFormatter();
         using (FileStream fileStream = new FileStream(Environment.GetFolderPath(
                                               Environment.SpecialFolder.ApplicationData)
@@ -137,5 +191,18 @@ public class PlayerManager : MonoBehaviour
         }
         ReactorManager.Instance.InitReactor(player.reactor, true);
         Money = player.money;
+        PauseMode = false;
+    }
+
+    public void ExitGame()
+    {
+        Save();
+        Application.Quit();
+    }
+
+    public void ResetGame()
+    {
+        NewGame();
+        Save();
     }
 }

@@ -2,6 +2,12 @@
 UI.SellPower = Продать энергию
 UI.DecreaseHeat = Уменьшить тепло
 UI.Cost = Цена:
+UI.AutoSave = Авто сохранение каждые
+UI.EffectsVolume = Громкость эффектов
+UI.MusicVolume = Громкость музыки
+UI.Menu = Меню
+UI.ResetGame = Сбросить игру
+UI.ExitGame = Закрыть & сохранить игру
 
 Item.0_RodX1.name = Зелёный тержень х1
 Item.0_RodX2.name = Зелёный тержень х2
