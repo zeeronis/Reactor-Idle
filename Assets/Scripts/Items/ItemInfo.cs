@@ -10,6 +10,8 @@ public class ItemInfo
 {
     [NonSerialized]
     public GameObject prefab;
+    [NonSerialized]
+    public ShopItem shopItem;
 
     public float durability;
     public float cost;

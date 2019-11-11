@@ -174,25 +174,25 @@ public class ReactorManager : MonoBehaviour
             if (cell.cellIndex.y > 0) //up
             {
                 _selectedCell = cellsGrid[(int)cell.cellIndex.x, (int)cell.cellIndex.y - 1];
-                if (_selectedCell.cellItem?.ItemType == ItemType.Rod) rodMultipler += 1f;
+                //if (_selectedCell.cellItem?.ItemType == ItemType.Rod) rodMultipler += 1f; //added in future (item upgrade)
                 CheckSelectedCell();
             }
             if(cell.cellIndex.y < cellsGrid.GetLength(1) - 1) //down
             {
                 _selectedCell = cellsGrid[(int)cell.cellIndex.x, (int)cell.cellIndex.y + 1];
-                if (_selectedCell.cellItem?.ItemType == ItemType.Rod) rodMultipler += 1f;
+                //if (_selectedCell.cellItem?.ItemType == ItemType.Rod) rodMultipler += 1f;
                 CheckSelectedCell();
             }
             if (cell.cellIndex.x > 0) //left
             {
                 _selectedCell = cellsGrid[(int)cell.cellIndex.x - 1, (int)cell.cellIndex.y];
-                if (_selectedCell.cellItem?.ItemType == ItemType.Rod) rodMultipler += 1f;
+                //if (_selectedCell.cellItem?.ItemType == ItemType.Rod) rodMultipler += 1f;
                 CheckSelectedCell();
             }
             if (cell.cellIndex.x < cellsGrid.GetLength(0) - 1) //right
             {
                 _selectedCell = cellsGrid[(int)cell.cellIndex.x + 1, (int)cell.cellIndex.y];
-                if (_selectedCell.cellItem?.ItemType == ItemType.Rod) rodMultipler += 1f;
+                //if (_selectedCell.cellItem?.ItemType == ItemType.Rod) rodMultipler += 1f;
                 CheckSelectedCell();
             }
 
@@ -380,7 +380,15 @@ public class ReactorManager : MonoBehaviour
 
     private void DestroyItem(Cell cell, bool explosion)
     {
-        itemsDictionary[cell.cellItem.ItemType].Remove(cell);
+        if(cell.cellItem.ItemType == ItemType.Rod && cell.cellItem.durability <= 0)
+        {
+            usedRodsList.Remove(cell);
+        }
+        else
+        {
+            itemsDictionary[cell.cellItem.ItemType].Remove(cell);
+        }
+      
         if (explosion)
         {
             Vector3 position = cell.transform.position;
@@ -602,7 +610,11 @@ public class ReactorManager : MonoBehaviour
     internal void BuyItem(Vector2 cellIndex)
     {
         Cell cell = cellsGrid[(int)cellIndex.x, (int)cellIndex.y];
-        if (cell.cellItem == null || cell.cellItem.durability == 0)
+        if(cell.cellItem?.ItemType == ItemType.Rod)
+        {
+            SellItem(cell);
+        }
+        if (cell.cellItem == null)
         {
             IItem item = preBuyItemPrefab.GetComponent<IItem>();
             ItemInfo itemInfo = ItemsManager.Instance.itemsInfo[item.ItemType][item.itemGradeType];
@@ -640,6 +652,7 @@ public class ReactorManager : MonoBehaviour
 
     internal void InitReactor(Reactor _reactor, bool isLoadGame)
     {
+        ItemsManager.Instance.CheckBlockedItems(!isLoadGame, true);
         bool lastPauseMode = PlayerManager.Instance.PauseMode;
         PlayerManager.Instance.PauseMode = true;
 

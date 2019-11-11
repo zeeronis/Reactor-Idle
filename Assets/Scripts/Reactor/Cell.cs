@@ -14,7 +14,7 @@ public class Cell : MonoBehaviour
     private void OnMouseDown()
     {
         mouseDownCell = this;
-        if (cellItem == null)
+        if (cellItem == null || cellItem.ItemType == ItemType.Rod && cellItem.durability <= 0 )
         {
             isBuildAction = true;
         }

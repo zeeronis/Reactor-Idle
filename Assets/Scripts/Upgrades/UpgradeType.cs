@@ -32,4 +32,6 @@ public enum UpgradeType
     Pipe_Eff,
     Vent_Durability,
     Vent_Eff,
+
+    Neighboring_Rods_Eff
 }

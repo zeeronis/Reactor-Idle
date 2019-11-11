@@ -35,7 +35,10 @@ public class ItemsManager: MonoBehaviour
     private GameObject[] BatteryPrefabs;
     [SerializeField]
     private GameObject[] rodPrefabs;
-
+    [SerializeField]
+    private Sprite blockItemSprite;
+    [SerializeField]
+    private GameObject[] shopTabs;
 
     public GameObject explosionItemPrefab;
     [HideInInspector]
@@ -73,6 +76,14 @@ public class ItemsManager: MonoBehaviour
             itemsInfo[ItemType.Battery][i].prefab = BatteryPrefabs[i];
             itemsInfo[ItemType.HeatPlate][i].prefab = heatPlatePrefabs[i];
         }
+        for (int i = 0; i < shopTabs.Length; i++)
+        {
+            ShopItem[] shopitems = shopTabs[i].GetComponentsInChildren<ShopItem>();
+            for (int j = 0; j < shopitems.Length; j++)
+            {
+                itemsInfo[shopitems[j].itemType][shopitems[j].itemGradeType].shopItem = shopitems[j];
+            }
+        }
 
         asset = Resources.Load("Upgrades") as TextAsset;
         using (Stream stream = new MemoryStream(asset.bytes))
@@ -98,7 +109,35 @@ public class ItemsManager: MonoBehaviour
         IsReady = true;
     }
 
-    public Slider GetSliderObject(Vector2 position)
+    internal void CheckBlockedItems(bool isOpenCheck, bool isCloseCheck)
+    {
+        var playerMoney = PlayerManager.Instance.player.money;
+        var blockedItems = PlayerManager.Instance.player.blockedItems;
+        for (int i = 0; i < blockedItems.Count; i++)
+        {
+            ItemInfo info = itemsInfo[blockedItems[i].ItemType][blockedItems[i].itemGradeType];
+            if (blockedItems[i].openMoneyValue < playerMoney)
+            {
+                if (isOpenCheck)
+                {
+                    info.shopItem.isOpenItem = true;
+                    info.shopItem.gameObject.GetComponent<Image>().sprite = info.prefab.gameObject.GetComponent<SpriteRenderer>().sprite;
+                    blockedItems.Remove(blockedItems[i]);
+                    i--;
+                }
+            }
+            else
+            {
+                if (isCloseCheck)
+                {
+                    info.shopItem.gameObject.GetComponent<Image>().sprite = blockItemSprite;
+                    info.shopItem.isOpenItem = false;
+                }
+            }
+        }
+    }
+
+    internal Slider GetSliderObject(Vector2 position)
     {
         return Instantiate(itemHpSliderPrefab, 
                            position - new Vector2(0, 0.9f),

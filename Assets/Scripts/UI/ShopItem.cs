@@ -6,11 +6,12 @@ using UnityEngine.EventSystems;
 public class ShopItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     [SerializeField]
-    private ItemType itemType;
+    internal ItemType itemType;
     [SerializeField]
-    private int itemGradeType;
+    internal int itemGradeType;
 
     private Transform itemTransform;
+    public bool isOpenItem = true;
 
     public void Start()
     {
@@ -20,13 +21,17 @@ public class ShopItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     public void Click()
     {
+        if (!isOpenItem) return;
+
         ReactorManager.Instance.SelectPreBuildItem(
-                    ItemsManager.Instance.itemsInfo[itemType][itemGradeType].prefab,
-                    itemTransform.position);
+                        ItemsManager.Instance.itemsInfo[itemType][itemGradeType].prefab,
+                        itemTransform.position);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        if (!isOpenItem) return;
+
         ItemInfo itemInfo = ItemsManager.Instance.itemsInfo[itemType][itemGradeType];
         ItemInfoPanel infoPanel = ItemsManager.Instance.itemInfoPanel;
         infoPanel.itemName.text = LocalizeText.CurrentLanguageStrings[itemInfo.keyName];
@@ -40,6 +45,8 @@ public class ShopItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     public void OnPointerExit(PointerEventData eventData)
     {
+        if (!isOpenItem) return;
+
         ItemsManager.Instance.itemInfoPanel.gameObject.SetActive(false);
     }
 }

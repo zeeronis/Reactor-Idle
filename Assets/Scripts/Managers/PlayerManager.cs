@@ -22,6 +22,10 @@ public class PlayerManager : MonoBehaviour
     private float nextSaveTime = 60f;
     private float autoSaveDelay = 60f;
 
+    private float checkBlockItemsTime = 10f;
+    private float checkBlockItemsDelay = 10f;
+    private float playerMaxMoney;
+
     public Player player;
     public float Money
     {
@@ -33,6 +37,7 @@ public class PlayerManager : MonoBehaviour
         {
             player.money = value;
             moneyText.text = value.ToString() + " $";
+            if (playerMaxMoney < value) playerMaxMoney = value;
         }
     }
 
@@ -76,6 +81,11 @@ public class PlayerManager : MonoBehaviour
                 nextSaveTime = Time.time + autoSaveDelay;
                 Save();
             }
+            if(Time.time > checkBlockItemsTime)
+            {
+                nextSaveTime = Time.time + checkBlockItemsDelay;
+                ItemsManager.Instance.CheckBlockedItems(true, false);
+            }
         }
         else
         {
@@ -101,18 +111,28 @@ public class PlayerManager : MonoBehaviour
         player = new Player
         {
             upgrades = new Dictionary<UpgradeType, int>(),
-            reactor = new Reactor() { gradeType = 0 }
+            reactor = new Reactor() { gradeType = 0 },
+            blockedItems = new List<BlockedItem>()
         };
-        foreach (UpgradeType type in Enum.GetValues(typeof(UpgradeType)))
+        foreach (UpgradeType upgradeType in Enum.GetValues(typeof(UpgradeType)))
         {
-            player.upgrades.Add(type, 0);
+            player.upgrades.Add(upgradeType, 0);
         }
+        foreach (ItemType itemType in Enum.GetValues(typeof(ItemType)))
+        {
+            for (int itemGrade = 0; itemGrade < ItemsManager.Instance.itemsInfo[itemType].Length; itemGrade++)
+            {
+                player.blockedItems.Add(new BlockedItem()
+                {
+                    ItemType = itemType,
+                    itemGradeType = itemGrade,
+                    openMoneyValue = ItemsManager.Instance.itemsInfo[itemType][itemGrade].cost / 4
+                });
+            }
+        }
+
         Money = 10;
-
         ReactorManager.Instance.InitReactor(player.reactor, false);
-
-        //DEBUG Value
-        //Money = float.MaxValue;
 
         IsReady = true;
     }
@@ -189,6 +209,12 @@ public class PlayerManager : MonoBehaviour
         {
             player = (Player)formatter.Deserialize(fileStream);
         }
+        for (int i = 0; i < player.blockedItems.Count; i++)
+        {
+            player.blockedItems[i].openMoneyValue = ItemsManager.Instance.itemsInfo[player.blockedItems[i].ItemType][player.blockedItems[i].itemGradeType]
+                                                        .cost / 4;
+        }
+
         ReactorManager.Instance.InitReactor(player.reactor, true);
         Money = player.money;
         PauseMode = false;
@@ -196,13 +222,17 @@ public class PlayerManager : MonoBehaviour
 
     public void ExitGame()
     {
-        Save();
         Application.Quit();
     }
 
     public void ResetGame()
     {
         NewGame();
+        Save();
+    }
+
+    private void OnApplicationQuit() //PC 
+    {
         Save();
     }
 }

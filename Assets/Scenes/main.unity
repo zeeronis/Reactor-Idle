@@ -995,6 +995,10 @@ MonoBehaviour:
   - {fileID: 4567896208355183119, guid: 9d5bc1da428809a4f94711917aed9881, type: 3}
   - {fileID: 6040092969178475971, guid: 4b01c2028abca674883322e00fc0198f, type: 3}
   - {fileID: 5860144374458948747, guid: 69ce56590c5cd2b45b275e5d34e0e469, type: 3}
+  blockItemSprite: {fileID: 21300000, guid: 27cf2f9fdd8c09a4d909d6d6685d9a90, type: 3}
+  shopTabs:
+  - {fileID: 1812346677}
+  - {fileID: 59180565}
   explosionItemPrefab: {fileID: 3821183776410654750, guid: eea57894cd4e2fe47b3e0f19965b9bb3,
     type: 3}
   itemInfoPanel: {fileID: 0}
@@ -8946,12 +8950,12 @@ GameObject:
   - component: {fileID: 1054940961}
   - component: {fileID: 1054940960}
   m_Layer: 5
-  m_Name: SaveButton
+  m_Name: SaveButton_TEST
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1054940959
 RectTransform:
   m_ObjectHideFlags: 0
@@ -9778,6 +9782,7 @@ MonoBehaviour:
   player:
     pauseMode: 0
     money: 0
+    blockedItems: []
     reactor:
       gradeType: 0
       heat: 0
@@ -10019,12 +10024,12 @@ GameObject:
   - component: {fileID: 1181593240}
   - component: {fileID: 1181593239}
   m_Layer: 5
-  m_Name: LoadButton (1)
+  m_Name: LoadButton_TEST
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1181593238
 RectTransform:
   m_ObjectHideFlags: 0
@@ -17313,7 +17318,7 @@ PrefabInstance:
     - target: {fileID: 7175978104638156205, guid: d05515c8b4691974ab7f897c269c3423,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.37000275
+      value: -0.36999512
       objectReference: {fileID: 0}
     - target: {fileID: 7175978104638156205, guid: d05515c8b4691974ab7f897c269c3423,
         type: 3}
@@ -17725,7 +17730,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 57.600037, y: -20}
+  m_AnchoredPosition: {x: 94.4, y: -20}
   m_SizeDelta: {x: 32, y: 32}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1884213014
