@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 [Serializable]
 public class UpgradeInfo
 {
+    public int maxUpgradeLvl;
     public float costBase;
     public float costMultipler;
     public string keyName;

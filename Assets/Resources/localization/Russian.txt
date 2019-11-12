@@ -8,6 +8,9 @@ UI.MusicVolume = Громкость музыки
 UI.Menu = Меню
 UI.ResetGame = Сбросить игру
 UI.ExitGame = Закрыть & сохранить игру
+UI.ResetGame.desc = Вы действительно хотите сбросить весь ваш игровой прогресс? Ваша игра будет начата сначала.
+UI.ResetGame.yes = Да, я хочу
+UI.Cancel = Отмена
 
 Item.0_RodX1.name = Зелёный тержень х1
 Item.0_RodX2.name = Зелёный тержень х2

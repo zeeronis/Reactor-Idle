@@ -28,7 +28,14 @@ public class ShopUpgradeItem : MonoBehaviour, IPointerEnterHandler, IPointerExit
         UpgradeInfo upgradeInfo = ItemsManager.Instance.upgradesInfo[upgradeType];
         ItemInfoPanel infoPanel = ItemsManager.Instance.itemInfoPanel;
         infoPanel.itemName.text = LocalizeText.CurrentLanguageStrings[upgradeInfo.keyName];
-        infoPanel.itemCost.text = upgradeInfo.GetCost(PlayerManager.Instance.player.upgrades[upgradeType]) + " $";
+        if(upgradeInfo.maxUpgradeLvl != PlayerManager.Instance.player.upgrades[upgradeType])
+        {
+            infoPanel.itemCost.text = upgradeInfo.GetCost(PlayerManager.Instance.player.upgrades[upgradeType]) + " $";
+        }
+        else
+        {
+            infoPanel.itemCost.text = "MAX LVL";
+        }
         infoPanel.itemDescription.text = LocalizeText.CurrentLanguageStrings[upgradeInfo.keyDesc];
 
         Vector3 viewPortPos = Camera.main.ScreenToViewportPoint(Input.mousePosition);

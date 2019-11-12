@@ -7,6 +7,7 @@ using UnityEngine;
 public class Player
 {
     public bool pauseMode;
+    public bool autoReplaceMode;
     public float money;
     public Dictionary<UpgradeType, int> upgrades;
     public List<BlockedItem> blockedItems;

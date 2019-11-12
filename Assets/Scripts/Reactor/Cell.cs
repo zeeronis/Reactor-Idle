@@ -30,7 +30,7 @@ public class Cell : MonoBehaviour
         {
             if (isBuildAction && ReactorManager.Instance.buildMod)
             {
-                ReactorManager.Instance.BuyItem(cellIndex);
+                ReactorManager.Instance.BuyItem(cellIndex, false);
             }
             else if (cellItem != null)
             {

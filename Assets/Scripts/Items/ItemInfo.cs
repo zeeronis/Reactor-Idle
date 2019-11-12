@@ -26,4 +26,36 @@ public class ItemInfo
                 ? UpgradeType.Battery_Durability 
                 : UpgradeType.Plate_Durability]));
     }
+
+    internal static float GetItemDurabilityMultipler(ItemType itemType, int itemGrade)
+    {
+        switch (itemType)
+        {
+            case ItemType.Rod:
+                if (itemGrade < 3)
+                    return (PlayerManager.Instance.player.upgrades[UpgradeType.RodGreen_Durability] + 1);
+                if (itemGrade < 6)
+                    return (PlayerManager.Instance.player.upgrades[UpgradeType.RodBlue_Durability] + 1);
+                if (itemGrade < 9)
+                    return (PlayerManager.Instance.player.upgrades[UpgradeType.RodBlue_Durability] + 1);
+                if (itemGrade < 12)
+                    return (PlayerManager.Instance.player.upgrades[UpgradeType.RodBlue_Durability] + 1);
+                if (itemGrade < 15)
+                    return (PlayerManager.Instance.player.upgrades[UpgradeType.RodBlue_Durability] + 1);
+                if (itemGrade < 18)
+                    return (PlayerManager.Instance.player.upgrades[UpgradeType.RodBlue_Durability] + 1);
+                return 1;
+            case ItemType.HeatPipe:
+                return (PlayerManager.Instance.player.upgrades[UpgradeType.Pipe_Durability] + 1);
+            case ItemType.HeatVent:
+                return (PlayerManager.Instance.player.upgrades[UpgradeType.Vent_Durability] + 1);
+            case ItemType.HeatPlate:
+                return (PlayerManager.Instance.player.upgrades[UpgradeType.Plate_Durability] + 1);
+            case ItemType.Battery:
+                return (PlayerManager.Instance.player.upgrades[UpgradeType.Battery_Durability] + 1);
+
+            default:
+                return 1;
+        }
+    }
 }

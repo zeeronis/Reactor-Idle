@@ -15,9 +15,13 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private Text moneyText;
     [SerializeField]
-    private Button PauseButton;
+    private Button pauseResumeButton;
     [SerializeField]
-    private Button ResumeButton;
+    private Sprite[] pauseResumeSprites;
+    [SerializeField]
+    private Button autoReplaceButton;
+    [SerializeField]
+    private Sprite[] autoReplaceSprites;
 
     private float nextSaveTime = 60f;
     private float autoSaveDelay = 60f;
@@ -52,13 +56,30 @@ public class PlayerManager : MonoBehaviour
             player.pauseMode = value;
             if (value)
             {
-                PauseButton.gameObject.SetActive(false);
-                ResumeButton.gameObject.SetActive(true);
+                pauseResumeButton.GetComponent<Image>().sprite = pauseResumeSprites[0];
             }
             else
             {
-                PauseButton.gameObject.SetActive(true);
-                ResumeButton.gameObject.SetActive(false);
+                pauseResumeButton.GetComponent<Image>().sprite = pauseResumeSprites[1];
+            }
+        }
+    }
+    public bool AutoReplaceMode
+    {
+        get
+        {
+            return player.autoReplaceMode;
+        }
+        set
+        {
+            player.autoReplaceMode = value;
+            if (value)
+            {
+                autoReplaceButton.GetComponent<Image>().sprite = autoReplaceSprites[0];
+            }
+            else
+            {
+                autoReplaceButton.GetComponent<Image>().sprite = autoReplaceSprites[1];
             }
         }
     }
@@ -131,6 +152,8 @@ public class PlayerManager : MonoBehaviour
             }
         }
 
+        AutoReplaceMode = false;
+        PauseMode = false;
         Money = 10;
         ReactorManager.Instance.InitReactor(player.reactor, false);
 
@@ -139,6 +162,9 @@ public class PlayerManager : MonoBehaviour
 
     internal bool BuyUpgrade(UpgradeType upgradeType)
     {
+        if (player.upgrades[upgradeType] == ItemsManager.Instance.upgradesInfo[upgradeType].maxUpgradeLvl)
+            return false;
+
         float upgradeCost = ItemsManager.Instance.upgradesInfo[upgradeType]
                                 .GetCost(player.upgrades[upgradeType]);
         if (Money >= upgradeCost)
@@ -150,6 +176,16 @@ public class PlayerManager : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+    public void ChangeAutoReplaceRodsMode()
+    {
+        AutoReplaceMode = !player.autoReplaceMode;
+    }
+
+    public void ChangePauseMode()
+    {
+        PauseMode = !player.pauseMode;
     }
 
     public void AutoSaveValueChanged(int index)
@@ -217,6 +253,8 @@ public class PlayerManager : MonoBehaviour
 
         ReactorManager.Instance.InitReactor(player.reactor, true);
         Money = player.money;
+        PauseMode = player.pauseMode;
+        AutoReplaceMode = player.autoReplaceMode;
         PauseMode = false;
     }
 
