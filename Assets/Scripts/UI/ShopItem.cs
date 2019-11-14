@@ -5,11 +5,12 @@ using UnityEngine.EventSystems;
 
 public class ShopItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
+    #pragma warning disable CS0649
     [SerializeField]
     internal ItemType itemType;
     [SerializeField]
     internal int itemGradeType;
-
+    #pragma warning restore CS0649
     private Transform itemTransform;
     public bool isOpenItem = true;
 

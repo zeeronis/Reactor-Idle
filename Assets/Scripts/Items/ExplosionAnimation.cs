@@ -12,7 +12,7 @@ public class ExplosionAnimation: MonoBehaviour
 
     public float frameRate = 0.07f;
     public Sprite[] frames;
-    private SpriteRenderer renderer;
+    private SpriteRenderer spriteRenderer;
     private float nextFrameTime = 0;
     private int frameIndex;
     private bool isRun = false;
@@ -26,19 +26,19 @@ public class ExplosionAnimation: MonoBehaviour
             if (frameIndex == frames.Length)
             {
                 isRun = false;
-                renderer.sprite = null;
+                spriteRenderer.sprite = null;
                 frameIndex = -1;
                 gameObject.SetActive(false);
                 currentlyInUse = false;
                 return;
             }
-            renderer.sprite = frames[frameIndex];
+            spriteRenderer.sprite = frames[frameIndex];
         }
     }
 
     private void Start()
     {
-        renderer = GetComponent<SpriteRenderer>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     public void Play()

@@ -12,6 +12,7 @@ public class PlayerManager : MonoBehaviour
     public static PlayerManager Instance { get => instance; private set => instance = value; }
     public static bool IsReady { get; private set; }
 
+    #pragma warning disable CS0649
     [SerializeField]
     private Text moneyText;
     [SerializeField]
@@ -22,6 +23,7 @@ public class PlayerManager : MonoBehaviour
     private Button autoReplaceButton;
     [SerializeField]
     private Sprite[] autoReplaceSprites;
+    #pragma warning restore CS0649
 
     private float nextSaveTime = 60f;
     private float autoSaveDelay = 60f;
@@ -249,6 +251,11 @@ public class PlayerManager : MonoBehaviour
         {
             player.blockedItems[i].openMoneyValue = ItemsManager.Instance.itemsInfo[player.blockedItems[i].ItemType][player.blockedItems[i].itemGradeType]
                                                         .cost / 4;
+        }
+        foreach (UpgradeType upgradeType in Enum.GetValues(typeof(UpgradeType)))
+        {
+            if (!player.upgrades.ContainsKey(upgradeType))
+                player.upgrades.Add(upgradeType, 0);
         }
 
         ReactorManager.Instance.InitReactor(player.reactor, true);

@@ -15,6 +15,7 @@ public class ItemsManager: MonoBehaviour
     public static ItemsManager Instance { get => instance; private set => instance = value; }
     public static bool IsReady { get; private set; }
 
+    #pragma warning disable CS0649
     [SerializeField]
     private Transform worldCanvasTransform;
     [SerializeField]
@@ -39,6 +40,7 @@ public class ItemsManager: MonoBehaviour
     private Sprite blockItemSprite;
     [SerializeField]
     private GameObject[] shopTabs;
+    #pragma warning restore CS0649
 
     public GameObject explosionItemPrefab;
     [HideInInspector]

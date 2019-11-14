@@ -10,6 +10,7 @@ public class ReactorManager : MonoBehaviour
     public static ReactorManager Instance { get => instance; private set => instance = value; }
     public static bool IsReady { get; private set; }
 
+    #pragma warning disable CS0649
     [SerializeField] private Slider powerBar;
     [SerializeField] private Slider heatBar;
     [SerializeField] private Text powerText;
@@ -42,6 +43,7 @@ public class ReactorManager : MonoBehaviour
     private int selectedItemTab = -1;
     private int currentTab = 0;
     private bool isEmpty;
+    #pragma warning restore CS0649
 
     private bool IsEmpty
     {
@@ -134,6 +136,7 @@ public class ReactorManager : MonoBehaviour
     private List<Cell> _destroyList = new List<Cell>();
     private Cell _selectedCell;
 
+
     private void FixedUpdate()
     {
         if (nextUpdateTime > Time.time || PlayerManager.Instance.PauseMode || !PlayerManager.IsReady)
@@ -163,6 +166,7 @@ public class ReactorManager : MonoBehaviour
         float addPower = 0;
         float rodMultipler;
         float upgradeEffMultipler = 1;
+        var playerUpgrades = PlayerManager.Instance.player.upgrades;
 
         //Rods
         foreach (var cell in itemsDictionary[ItemType.Rod])
@@ -173,25 +177,29 @@ public class ReactorManager : MonoBehaviour
             if (cell.cellIndex.y > 0) //up
             {
                 _selectedCell = cellsGrid[(int)cell.cellIndex.x, (int)cell.cellIndex.y - 1];
-                //if (_selectedCell.cellItem?.ItemType == ItemType.Rod) rodMultipler += 1f; //added in future (item upgrade)
+                if (_selectedCell.cellItem?.ItemType == ItemType.Rod)
+                    rodMultipler += playerUpgrades[UpgradeType.Neighboring_Rods_Eff] * 0.05f; 
                 CheckSelectedCell();
             }
             if(cell.cellIndex.y < cellsGrid.GetLength(1) - 1) //down
             {
                 _selectedCell = cellsGrid[(int)cell.cellIndex.x, (int)cell.cellIndex.y + 1];
-                //if (_selectedCell.cellItem?.ItemType == ItemType.Rod) rodMultipler += 1f;
+                if (_selectedCell.cellItem?.ItemType == ItemType.Rod)
+                    rodMultipler += playerUpgrades[UpgradeType.Neighboring_Rods_Eff] * 0.05f;
                 CheckSelectedCell();
             }
             if (cell.cellIndex.x > 0) //left
             {
                 _selectedCell = cellsGrid[(int)cell.cellIndex.x - 1, (int)cell.cellIndex.y];
-                //if (_selectedCell.cellItem?.ItemType == ItemType.Rod) rodMultipler += 1f;
+                if (_selectedCell.cellItem?.ItemType == ItemType.Rod)
+                    rodMultipler += playerUpgrades[UpgradeType.Neighboring_Rods_Eff] * 0.05f;
                 CheckSelectedCell();
             }
             if (cell.cellIndex.x < cellsGrid.GetLength(0) - 1) //right
             {
                 _selectedCell = cellsGrid[(int)cell.cellIndex.x + 1, (int)cell.cellIndex.y];
-                //if (_selectedCell.cellItem?.ItemType == ItemType.Rod) rodMultipler += 1f;
+                if (_selectedCell.cellItem?.ItemType == ItemType.Rod)
+                    rodMultipler += playerUpgrades[UpgradeType.Neighboring_Rods_Eff] * 0.05f;
                 CheckSelectedCell();
             }
 
@@ -221,7 +229,7 @@ public class ReactorManager : MonoBehaviour
 
 
         //Pipes
-        upgradeEffMultipler = 1 + PlayerManager.Instance.player.upgrades[UpgradeType.Pipe_Eff];
+        upgradeEffMultipler = 1 + playerUpgrades[UpgradeType.Pipe_Eff];
         foreach (var cell in itemsDictionary[ItemType.HeatPipe])
         {
             if(cell.cellItem.heat != 0)
@@ -289,7 +297,7 @@ public class ReactorManager : MonoBehaviour
 
 
         //Vents
-        upgradeEffMultipler = 1 + PlayerManager.Instance.player.upgrades[UpgradeType.Vent_Eff];
+        upgradeEffMultipler = 1 + playerUpgrades[UpgradeType.Vent_Eff];
         foreach (var cell in itemsDictionary[ItemType.HeatVent])
         {
             HeatVentInfo pipeInfo = (HeatVentInfo)ItemsManager.Instance.itemsInfo[cell.cellItem.ItemType][cell.cellItem.itemGradeType];
@@ -335,10 +343,16 @@ public class ReactorManager : MonoBehaviour
             }
         }
 
-        //UI//Heat//Energy
+        //UI//Heat//Energy//Money
         Heat += addHeat;
         Power += addPower;
         PlayerManager.Instance.Money += addMoney;
+
+        float decreaseHeat = maxHeat / 100 * playerUpgrades[UpgradeType.AutoDecreaseHeat];
+        Heat -= reactor.heat < decreaseHeat ? reactor.heat : decreaseHeat;
+        float sellPower = maxPower / 100 * playerUpgrades[UpgradeType.AutoSellPower];
+        Power -= reactor.power < sellPower ? reactor.power : sellPower;
+
 
         //DEBUG
         sw.Stop();

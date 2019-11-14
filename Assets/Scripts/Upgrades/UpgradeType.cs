@@ -33,5 +33,7 @@ public enum UpgradeType
     Vent_Durability,
     Vent_Eff,
 
-    Neighboring_Rods_Eff
+    Neighboring_Rods_Eff,
+    AutoSellPower,
+    AutoDecreaseHeat,
 }
