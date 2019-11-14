@@ -25,6 +25,8 @@ public class ItemsManager: MonoBehaviour
     private Slider itemHpSliderPrefab;
     [SerializeField]
     private GameObject itemInfoPanelPrefab;
+    [SerializeField]
+    private GameObject shopReactorItemPrefab;
 
     [SerializeField]
     private GameObject[] ventPrefabs;
@@ -40,6 +42,8 @@ public class ItemsManager: MonoBehaviour
     private Sprite blockItemSprite;
     [SerializeField]
     private GameObject[] shopTabs;
+    [SerializeField]
+    private GameObject shopReactorsContent;
     #pragma warning restore CS0649
 
     public GameObject explosionItemPrefab;
@@ -57,7 +61,7 @@ public class ItemsManager: MonoBehaviour
         if (Instance == null)
             Instance = this;
 
-        //Generate.Run(true);
+        //Generate.Run(true); 
 
         TextAsset asset = Resources.Load("Items") as TextAsset;
         BinaryFormatter formatter = new BinaryFormatter();
@@ -97,6 +101,12 @@ public class ItemsManager: MonoBehaviour
         using (Stream stream = new MemoryStream(asset.bytes))
         {
             reactorsInfo = (ReactorInfo[])formatter.Deserialize(stream);
+        }
+        for (int i = 0; i < reactorsInfo.Length; i++)
+        {
+            Instantiate(shopReactorItemPrefab, Vector3.zero,
+                        Quaternion.identity, shopReactorsContent.transform)
+                .GetComponent<ShopReactorItem>().SetInfo(i);
         }
 
         itemInfoPanel = Instantiate(itemInfoPanelPrefab, Vector3.zero, Quaternion.identity, UICanvasTransform).GetComponent<ItemInfoPanel>();

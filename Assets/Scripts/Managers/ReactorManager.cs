@@ -603,6 +603,20 @@ public class ReactorManager : MonoBehaviour
         if (isAutoBuy && playerPreBuyItem != null) preBuyItemPrefab = playerPreBuyItem;
     }
 
+    public void BuyReactor(int reactorType)
+    {
+        if (reactor.heat != 0 || reactor.power != 0) return;
+
+        ReactorInfo reactorInfo = ItemsManager.Instance.reactorsInfo[reactorType];
+        Player player = PlayerManager.Instance.player;
+        if(player.money >= reactorInfo.cost)
+        {
+            player.money -= reactorInfo.cost;
+            player.reactor = new Reactor() { gradeType = reactorType };
+            InitReactor(player.reactor, false);
+        }
+    }
+
     internal void CalcMaxHeat()
     {
         float maxHeat = ItemsManager.Instance.reactorsInfo[reactor.gradeType].baseMaxHeat;

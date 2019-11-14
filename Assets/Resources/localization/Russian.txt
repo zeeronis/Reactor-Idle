@@ -2,10 +2,12 @@
 UI.SellPower = Продать энергию
 UI.DecreaseHeat = Уменьшить тепло
 UI.Cost = Цена:
+UI.Size = Размер:
 UI.AutoSave = Авто сохранение каждые
 UI.EffectsVolume = Громкость эффектов
 UI.MusicVolume = Громкость музыки
 UI.Menu = Меню
+UI.Back = Назад
 UI.ResetGame = Сбросить игру
 UI.ExitGame = Закрыть & сохранить игру
 UI.ResetGame.desc = Вы действительно хотите сбросить весь ваш игровой прогресс? Ваша игра будет начата сначала.
@@ -14,6 +16,10 @@ UI.Cancel = Отмена
 UI.Rods = Стержни:
 UI.Heat = Тепло:
 UI.SpecialUpgrades = Специальные апгрейды:
+UI.BuyReactor = Купить реактор
+UI.ReactorsShop = Магазин реакторов
+UI.ReactorBuyAlert = Предупреждение! Все предметы в клетках будут уничтожены, когда вы купите новый реактор.
+UI.ReactorBuyInfo = Чтобы приобрести реактор, вы должны иметь 0 тепла и энергии в хранилище реактора.
 
 Item.0_RodX1.name = Зелёный тержень х1
 Item.0_RodX2.name = Зелёный тержень х2
