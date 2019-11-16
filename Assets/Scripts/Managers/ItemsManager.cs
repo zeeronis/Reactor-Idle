@@ -27,6 +27,8 @@ public class ItemsManager: MonoBehaviour
     private GameObject itemInfoPanelPrefab;
     [SerializeField]
     private GameObject shopReactorItemPrefab;
+    [SerializeField]
+    private Sprite blockItemSprite;
 
     [SerializeField]
     private GameObject[] ventPrefabs;
@@ -39,9 +41,9 @@ public class ItemsManager: MonoBehaviour
     [SerializeField]
     private GameObject[] rodPrefabs;
     [SerializeField]
-    private Sprite blockItemSprite;
+    private GameObject shopPanel;
     [SerializeField]
-    private GameObject[] shopTabs;
+    private GameObject upgradesPanel;
     [SerializeField]
     private GameObject shopReactorsContent;
     #pragma warning restore CS0649
@@ -82,19 +84,22 @@ public class ItemsManager: MonoBehaviour
             itemsInfo[ItemType.Battery][i].prefab = BatteryPrefabs[i];
             itemsInfo[ItemType.HeatPlate][i].prefab = heatPlatePrefabs[i];
         }
-        for (int i = 0; i < shopTabs.Length; i++)
+        ShopItem[] shopitems = shopPanel.GetComponentsInChildren<ShopItem>(true);
+        for (int i = 0; i < shopitems.Length; i++)
         {
-            ShopItem[] shopitems = shopTabs[i].GetComponentsInChildren<ShopItem>();
-            for (int j = 0; j < shopitems.Length; j++)
-            {
-                itemsInfo[shopitems[j].itemType][shopitems[j].itemGradeType].shopItem = shopitems[j];
-            }
+            itemsInfo[shopitems[i].itemType][shopitems[i].itemGradeType].shopItem = shopitems[i];
         }
 
         asset = Resources.Load("Upgrades") as TextAsset;
         using (Stream stream = new MemoryStream(asset.bytes))
         {
             upgradesInfo = (Dictionary<UpgradeType, UpgradeInfo>)formatter.Deserialize(stream);
+        }
+        ShopUpgradeItem[] upgradeItems = upgradesPanel.GetComponentsInChildren<ShopUpgradeItem>(true);
+        for (int i = 0; i < upgradeItems.Length; i++)
+        {
+            upgradesInfo[upgradeItems[i].UpgradeType].shopUpgrade = upgradeItems[i];
+            upgradesInfo[upgradeItems[i].UpgradeType].defaultSprite = upgradeItems[i].GetComponentsInChildren<Image>(true)[1].sprite;
         }
 
         asset = Resources.Load("Reactors") as TextAsset;
@@ -144,6 +149,25 @@ public class ItemsManager: MonoBehaviour
                 {
                     info.shopItem.gameObject.GetComponent<Image>().sprite = blockItemSprite;
                     info.shopItem.isOpenItem = false;
+                }
+            }
+        }
+        foreach (var item in upgradesInfo)
+        {
+            if(item.Value.costBase / 4 < playerMoney)
+            {
+                if (isOpenCheck && item.Value.shopUpgrade != null)
+                {
+                    item.Value.shopUpgrade.GetComponentsInChildren<Image>(true)[1].sprite = item.Value.defaultSprite;
+                    item.Value.shopUpgrade.isOpenUpgrade = true;
+                }
+            }
+            else
+            {
+                if (isCloseCheck && item.Value.shopUpgrade != null)
+                {
+                    item.Value.shopUpgrade.GetComponentsInChildren<Image>(true)[1].sprite = blockItemSprite;
+                    item.Value.shopUpgrade.isOpenUpgrade = false;
                 }
             }
         }

@@ -15,6 +15,8 @@ public class ReactorManager : MonoBehaviour
     [SerializeField] private Slider heatBar;
     [SerializeField] private Text powerText;
     [SerializeField] private Text heatText;
+    [SerializeField] private Text powerMonitorText;
+    [SerializeField] private Text heatMonitorText;
     [SerializeField] private Button buttonIncreaceMoney;
 
     private Reactor reactor;
@@ -346,6 +348,8 @@ public class ReactorManager : MonoBehaviour
         //UI//Heat//Energy//Money
         Heat += addHeat;
         Power += addPower;
+        heatMonitorText.text = "+" + addHeat;
+        powerMonitorText.text = "+" + addPower;
         PlayerManager.Instance.Money += addMoney;
 
         float decreaseHeat = maxHeat / 100 * playerUpgrades[UpgradeType.AutoDecreaseHeat];
@@ -603,17 +607,18 @@ public class ReactorManager : MonoBehaviour
         if (isAutoBuy && playerPreBuyItem != null) preBuyItemPrefab = playerPreBuyItem;
     }
 
-    public void BuyReactor(int reactorType)
+    internal void BuyReactor(int reactorType)
     {
-        if (reactor.heat != 0 || reactor.power != 0) return;
-
-        ReactorInfo reactorInfo = ItemsManager.Instance.reactorsInfo[reactorType];
-        Player player = PlayerManager.Instance.player;
-        if(player.money >= reactorInfo.cost)
+        if (reactor.heat == 0 || reactor.power == 0)
         {
-            player.money -= reactorInfo.cost;
-            player.reactor = new Reactor() { gradeType = reactorType };
-            InitReactor(player.reactor, false);
+            ReactorInfo reactorInfo = ItemsManager.Instance.reactorsInfo[reactorType];
+            Player player = PlayerManager.Instance.player;
+            if (player.money >= reactorInfo.cost)
+            {
+                player.money -= reactorInfo.cost;
+                player.reactor = new Reactor() { gradeType = reactorType };
+                InitReactor(player.reactor, false);
+            }
         }
     }
 

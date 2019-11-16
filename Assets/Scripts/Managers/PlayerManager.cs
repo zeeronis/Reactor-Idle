@@ -26,10 +26,9 @@ public class PlayerManager : MonoBehaviour
     #pragma warning restore CS0649
 
     private float nextSaveTime = 60f;
-    private float autoSaveDelay = 60f;
 
     private float checkBlockItemsTime = 10f;
-    private float checkBlockItemsDelay = 10f;
+    private float checkBlockItemsDelay = 1f;
     private float playerMaxMoney;
 
     public Player player;
@@ -101,12 +100,14 @@ public class PlayerManager : MonoBehaviour
         {
             if (Time.time > nextSaveTime)
             {
-                nextSaveTime = Time.time + autoSaveDelay;
+                Debug.Log("Save");
+                nextSaveTime = Time.time + player.autoSaveDelay;
                 Save();
             }
             if(Time.time > checkBlockItemsTime)
             {
-                nextSaveTime = Time.time + checkBlockItemsDelay;
+                Debug.Log("Check");
+                checkBlockItemsTime = Time.time + checkBlockItemsDelay;
                 ItemsManager.Instance.CheckBlockedItems(true, false);
             }
         }
@@ -114,7 +115,7 @@ public class PlayerManager : MonoBehaviour
         {
             if (ItemsManager.IsReady && PoolManager.IsReady && ReactorManager.IsReady)
             {
-                nextSaveTime = Time.time + autoSaveDelay;
+                nextSaveTime = Time.time + player.autoSaveDelay;
                 if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
                                 + "/ReactorIdle/pData.bytes"))
                 {
@@ -135,7 +136,8 @@ public class PlayerManager : MonoBehaviour
         {
             upgrades = new Dictionary<UpgradeType, int>(),
             reactor = new Reactor() { gradeType = 0 },
-            blockedItems = new List<BlockedItem>()
+            blockedItems = new List<BlockedItem>(),
+            autoSaveDelay = 60
         };
         foreach (UpgradeType upgradeType in Enum.GetValues(typeof(UpgradeType)))
         {
@@ -195,29 +197,29 @@ public class PlayerManager : MonoBehaviour
         switch (index)
         {
             case 0:
-                autoSaveDelay = 60;
+                player.autoSaveDelay = 60;
                 break;
             case 1:
-                autoSaveDelay = 3 * 60;
+                player.autoSaveDelay = 3 * 60;
                 break;
             case 2:
-                autoSaveDelay = 5 * 60;
+                player.autoSaveDelay = 5 * 60;
                 break;
             case 3:
-                autoSaveDelay = 10 * 60;
+                player.autoSaveDelay = 10 * 60;
                 break;
             case 4:
-                autoSaveDelay = 20 * 60;
+                player.autoSaveDelay = 20 * 60;
                 break;
             case 5:
-                autoSaveDelay = 30 * 60;
+                player.autoSaveDelay = 30 * 60;
                 break;
 
             default:
-                autoSaveDelay = 60;
+                player.autoSaveDelay = 60;
                 break;
         }
-        nextSaveTime = Time.time + autoSaveDelay;
+        nextSaveTime = Time.time + player.autoSaveDelay;
     }
 
     public void Save()
@@ -262,6 +264,7 @@ public class PlayerManager : MonoBehaviour
         Money = player.money;
         PauseMode = player.pauseMode;
         AutoReplaceMode = player.autoReplaceMode;
+        nextSaveTime = Time.time + player.autoSaveDelay;
         PauseMode = false;
     }
 

@@ -11,6 +11,8 @@ public class ShopUpgradeItem : MonoBehaviour, IPointerEnterHandler, IPointerExit
     #pragma warning restore CS0649
     private Transform shopItemTransform;
 
+    public bool isOpenUpgrade = true;
+    public UpgradeType UpgradeType { get => upgradeType; set => upgradeType = value; }
 
     public void Start()
     {
@@ -28,6 +30,8 @@ public class ShopUpgradeItem : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        if (!isOpenUpgrade) return;
+
         UpgradeInfo upgradeInfo = ItemsManager.Instance.upgradesInfo[upgradeType];
         ItemInfoPanel infoPanel = ItemsManager.Instance.itemInfoPanel;
         infoPanel.itemName.text = LocalizeText.CurrentLanguageStrings[upgradeInfo.keyName];

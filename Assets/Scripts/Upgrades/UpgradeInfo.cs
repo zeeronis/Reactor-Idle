@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 [Serializable]
 public class UpgradeInfo
@@ -12,6 +13,11 @@ public class UpgradeInfo
     public float costMultipler;
     public string keyName;
     public string keyDesc;
+
+    [NonSerialized]
+    public ShopUpgradeItem shopUpgrade;
+    [NonSerialized]
+    public Sprite defaultSprite;
 
     public float GetCost(int lvl)
     {
