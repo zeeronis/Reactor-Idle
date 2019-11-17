@@ -350,13 +350,13 @@ public class ReactorManager : MonoBehaviour
         Power += addPower;
         heatMonitorText.text = "+" + addHeat;
         powerMonitorText.text = "+" + addPower;
-        PlayerManager.Instance.Money += addMoney;
 
-        float decreaseHeat = maxHeat / 100 * playerUpgrades[UpgradeType.AutoDecreaseHeat];
-        Heat -= reactor.heat < decreaseHeat ? reactor.heat : decreaseHeat;
-        float sellPower = maxPower / 100 * playerUpgrades[UpgradeType.AutoSellPower];
-        Power -= reactor.power < sellPower ? reactor.power : sellPower;
-
+        float canDecreaseHeat = maxHeat / 100 * playerUpgrades[UpgradeType.AutoDecreaseHeat];
+        Heat -= reactor.heat < canDecreaseHeat ? reactor.heat : canDecreaseHeat;
+        float canSellPower = maxPower / 100 * playerUpgrades[UpgradeType.AutoSellPower];
+        float soldPower = reactor.power < canSellPower ? reactor.power : canSellPower;
+        Power -= soldPower;
+        PlayerManager.Instance.Money += addMoney + soldPower;
 
         //DEBUG
         sw.Stop();
@@ -429,11 +429,14 @@ public class ReactorManager : MonoBehaviour
                 cellsGrid[row, column].cellIndex = new Vector2(row, column);
                 if(isLoadGame)
                 {
-                    if(reactor.serializableCells[row,column] != null)
+                    if(row < reactor.serializableCells.GetLength(0) && column < reactor.serializableCells.GetLength(1))
                     {
-                        SetItem(cellsGrid[row, column],
-                                reactor.serializableCells[row, column],
-                                false);
+                        if (reactor.serializableCells[row, column] != null)
+                        {
+                            SetItem(cellsGrid[row, column],
+                                    reactor.serializableCells[row, column],
+                                    false);
+                        }
                     }
                 }
             }

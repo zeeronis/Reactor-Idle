@@ -129,29 +129,30 @@ public class ItemsManager: MonoBehaviour
     internal void CheckBlockedItems(bool isOpenCheck, bool isCloseCheck)
     {
         var playerMoney = PlayerManager.Instance.player.money;
-        var blockedItems = PlayerManager.Instance.player.blockedItems;
-        for (int i = 0; i < blockedItems.Count; i++)
+        foreach (var item in itemsInfo)
         {
-            ItemInfo info = itemsInfo[blockedItems[i].ItemType][blockedItems[i].itemGradeType];
-            if (blockedItems[i].openMoneyValue < playerMoney)
+            for (int i = 0; i < item.Value.Length; i++)
             {
-                if (isOpenCheck)
+                if (item.Value[i].cost / 4 < playerMoney)
                 {
-                    info.shopItem.isOpenItem = true;
-                    info.shopItem.gameObject.GetComponent<Image>().sprite = info.prefab.gameObject.GetComponent<SpriteRenderer>().sprite;
-                    blockedItems.Remove(blockedItems[i]);
-                    i--;
+                    if (isOpenCheck)
+                    {
+                        item.Value[i].shopItem.isOpenItem = true;
+                        item.Value[i].shopItem.gameObject.GetComponent<Image>().sprite = item.Value[i]
+                            .prefab.gameObject.GetComponent<SpriteRenderer>().sprite;
+                    }
                 }
-            }
-            else
-            {
-                if (isCloseCheck)
+                else
                 {
-                    info.shopItem.gameObject.GetComponent<Image>().sprite = blockItemSprite;
-                    info.shopItem.isOpenItem = false;
+                    if (isCloseCheck)
+                    {
+                        item.Value[i].shopItem.gameObject.GetComponent<Image>().sprite = blockItemSprite;
+                        item.Value[i].shopItem.isOpenItem = false;
+                    }
                 }
             }
         }
+
         foreach (var item in upgradesInfo)
         {
             if(item.Value.costBase / 4 < playerMoney)

@@ -11,6 +11,5 @@ public class Player
     public bool autoReplaceMode;
     public float money;
     public Dictionary<UpgradeType, int> upgrades;
-    public List<BlockedItem> blockedItems;
     public Reactor reactor;
 }

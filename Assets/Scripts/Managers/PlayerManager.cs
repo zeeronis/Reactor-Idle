@@ -27,8 +27,8 @@ public class PlayerManager : MonoBehaviour
 
     private float nextSaveTime = 60f;
 
-    private float checkBlockItemsTime = 10f;
-    private float checkBlockItemsDelay = 1f;
+    private float checkBlockItemsTime = 2f;
+    private float checkBlockItemsDelay = 2f;
     private float playerMaxMoney;
 
     public Player player;
@@ -136,24 +136,11 @@ public class PlayerManager : MonoBehaviour
         {
             upgrades = new Dictionary<UpgradeType, int>(),
             reactor = new Reactor() { gradeType = 0 },
-            blockedItems = new List<BlockedItem>(),
             autoSaveDelay = 60
         };
         foreach (UpgradeType upgradeType in Enum.GetValues(typeof(UpgradeType)))
         {
             player.upgrades.Add(upgradeType, 0);
-        }
-        foreach (ItemType itemType in Enum.GetValues(typeof(ItemType)))
-        {
-            for (int itemGrade = 0; itemGrade < ItemsManager.Instance.itemsInfo[itemType].Length; itemGrade++)
-            {
-                player.blockedItems.Add(new BlockedItem()
-                {
-                    ItemType = itemType,
-                    itemGradeType = itemGrade,
-                    openMoneyValue = ItemsManager.Instance.itemsInfo[itemType][itemGrade].cost / 4
-                });
-            }
         }
 
         AutoReplaceMode = false;
@@ -248,11 +235,6 @@ public class PlayerManager : MonoBehaviour
                                               + "/ReactorIdle/pData.bytes", FileMode.OpenOrCreate))
         {
             player = (Player)formatter.Deserialize(fileStream);
-        }
-        for (int i = 0; i < player.blockedItems.Count; i++)
-        {
-            player.blockedItems[i].openMoneyValue = ItemsManager.Instance.itemsInfo[player.blockedItems[i].ItemType][player.blockedItems[i].itemGradeType]
-                                                        .cost / 4;
         }
         foreach (UpgradeType upgradeType in Enum.GetValues(typeof(UpgradeType)))
         {
