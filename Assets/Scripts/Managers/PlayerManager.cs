@@ -23,13 +23,14 @@ public class PlayerManager : MonoBehaviour
     private Button autoReplaceButton;
     [SerializeField]
     private Sprite[] autoReplaceSprites;
+    public RectTransform UICanvasRect;
     #pragma warning restore CS0649
 
+    private string savePath;
     private float nextSaveTime = 60f;
 
     private float checkBlockItemsTime = 2f;
     private float checkBlockItemsDelay = 2f;
-    private float playerMaxMoney;
 
     public Player player;
     public float Money
@@ -42,7 +43,7 @@ public class PlayerManager : MonoBehaviour
         {
             player.money = value;
             moneyText.text = value.ToString() + " $";
-            if (playerMaxMoney < value) playerMaxMoney = value;
+            if (player.maxMoney < value) player.maxMoney = value;
         }
     }
 
@@ -91,7 +92,16 @@ public class PlayerManager : MonoBehaviour
         if (Instance == null)
             Instance = this;
 
-        Screen.SetResolution(840, 480, FullScreenMode.Windowed);
+        #if UNITY_ANDROID
+        savePath = Application.persistentDataPath + "/pData.bytes";
+        #endif
+
+        #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+        savePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/ReactorIdle/pData.bytes";
+        Directory.CreateDirectory(Environment.GetFolderPath(
+                          Environment.SpecialFolder.ApplicationData)
+                          + "/ReactorIdle");
+        #endif
     }
 
     private void FixedUpdate()
@@ -100,13 +110,11 @@ public class PlayerManager : MonoBehaviour
         {
             if (Time.time > nextSaveTime)
             {
-                Debug.Log("Save");
                 nextSaveTime = Time.time + player.autoSaveDelay;
                 Save();
             }
             if(Time.time > checkBlockItemsTime)
             {
-                Debug.Log("Check");
                 checkBlockItemsTime = Time.time + checkBlockItemsDelay;
                 ItemsManager.Instance.CheckBlockedItems(true, false);
             }
@@ -116,8 +124,7 @@ public class PlayerManager : MonoBehaviour
             if (ItemsManager.IsReady && PoolManager.IsReady && ReactorManager.IsReady)
             {
                 nextSaveTime = Time.time + player.autoSaveDelay;
-                if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
-                                + "/ReactorIdle/pData.bytes"))
+                if (File.Exists(savePath))
                 {
                     Load();
                 }
@@ -164,6 +171,7 @@ public class PlayerManager : MonoBehaviour
             player.upgrades[upgradeType]++;
             if (upgradeType == UpgradeType.Battery_Durability) ReactorManager.Instance.CalcMaxPower();
             if (upgradeType == UpgradeType.Plate_Durability) ReactorManager.Instance.CalcMaxHeat();
+            ReactorManager.Instance.CheckPlayerBankruptcy();
             return true;
         }
         return false;
@@ -214,12 +222,8 @@ public class PlayerManager : MonoBehaviour
         PauseMode = true;
         ReactorManager.Instance.SaveCells();
         BinaryFormatter formatter = new BinaryFormatter();
-        Directory.CreateDirectory(Environment.GetFolderPath(
-                                  Environment.SpecialFolder.ApplicationData) 
-                                  + "/ReactorIdle");
-        using (FileStream fileStream = new FileStream(Environment.GetFolderPath(
-                                              Environment.SpecialFolder.ApplicationData) 
-                                              + "/ReactorIdle/pData.bytes", FileMode.OpenOrCreate))
+
+        using (FileStream fileStream = new FileStream(savePath, FileMode.OpenOrCreate))
         {
             formatter.Serialize(fileStream, player);
         }
@@ -230,9 +234,7 @@ public class PlayerManager : MonoBehaviour
     {
         PauseMode = true;
         BinaryFormatter formatter = new BinaryFormatter();
-        using (FileStream fileStream = new FileStream(Environment.GetFolderPath(
-                                              Environment.SpecialFolder.ApplicationData)
-                                              + "/ReactorIdle/pData.bytes", FileMode.OpenOrCreate))
+        using (FileStream fileStream = new FileStream(savePath, FileMode.OpenOrCreate))
         {
             player = (Player)formatter.Deserialize(fileStream);
         }
@@ -261,8 +263,17 @@ public class PlayerManager : MonoBehaviour
         Save();
     }
 
-    private void OnApplicationQuit() //PC 
+    #if UNITY_ANDROID
+    private void OnApplicationFocus(bool focus)
+    {
+        if (!focus) Save();
+    }
+    #endif
+
+    #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+    private void OnApplicationQuit()
     {
         Save();
     }
+    #endif
 }

@@ -37,10 +37,9 @@ public class ShopItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         ItemInfoPanel infoPanel = ItemsManager.Instance.itemInfoPanel;
         infoPanel.itemName.text = LocalizeText.CurrentLanguageStrings[itemInfo.keyName];
         infoPanel.itemCost.text = itemInfo.cost + " $";
-
         infoPanel.itemDescription.text = itemInfo.GetLocaleDesc(LocalizeText.CurrentLanguageStrings[itemInfo.keyDesc]);
 
-        infoPanel.transform.position = Input.mousePosition - new Vector3(-infoPanel.GetComponent<RectTransform>().rect.x + 15, infoPanel.GetComponent<RectTransform>().rect.y - 7);
+        infoPanel.SetPosition(Input.mousePosition);
         infoPanel.gameObject.SetActive(true);
     }
 

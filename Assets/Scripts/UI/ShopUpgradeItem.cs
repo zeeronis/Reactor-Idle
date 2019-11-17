@@ -45,10 +45,7 @@ public class ShopUpgradeItem : MonoBehaviour, IPointerEnterHandler, IPointerExit
         }
         infoPanel.itemDescription.text = LocalizeText.CurrentLanguageStrings[upgradeInfo.keyDesc];
 
-        Vector3 viewPortPos = Camera.main.ScreenToViewportPoint(Input.mousePosition);
-        infoPanel.transform.position = Input.mousePosition -
-            new Vector3((infoPanel.GetComponent<RectTransform>().rect.x) * (viewPortPos.x < 0.49f ? 1 : -1),
-            infoPanel.GetComponent<RectTransform>().rect.y - 7);
+        infoPanel.SetPosition(Input.mousePosition);
         infoPanel.gameObject.SetActive(true);
     }
 

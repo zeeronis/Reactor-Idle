@@ -56,12 +56,10 @@ public class ReactorManager : MonoBehaviour
         set
         {
             isEmpty = value;
-            if (isEmpty && PlayerManager.Instance?.Money < 10 && Power == 0)
-            {
-                buttonIncreaceMoney.gameObject.SetActive(true);
-            }
+            CheckPlayerBankruptcy();
         }
     }
+
     private GameObject preBuyItemPrefab;
     public bool buildMod = false;
 
@@ -144,8 +142,10 @@ public class ReactorManager : MonoBehaviour
         if (nextUpdateTime > Time.time || PlayerManager.Instance.PauseMode || !PlayerManager.IsReady)
             return;
 
+        #if UNITY_EDITOR
         var sw = new System.Diagnostics.Stopwatch();
         sw.Start();
+        #endif
 
         _destroyList.Clear();
         if (reactor.heat == MaxHeat)
@@ -358,9 +358,11 @@ public class ReactorManager : MonoBehaviour
         Power -= soldPower;
         PlayerManager.Instance.Money += addMoney + soldPower;
 
+        #if UNITY_EDITOR
         //DEBUG
         sw.Stop();
         Debug.Log("ticks: " + sw.ElapsedTicks);
+        #endif
     }
 
     private void CheckSelectedCell()
@@ -675,10 +677,6 @@ public class ReactorManager : MonoBehaviour
         }
         reactor = _reactor;
         ReactorInfo reactorInfo = ItemsManager.Instance.reactorsInfo[reactor.gradeType];
-        MaxHeat = reactorInfo.baseMaxHeat;
-        MaxPower = reactorInfo.baseMaxPower;
-        Heat = reactor.heat;
-        Power = reactor.power;
         IsEmpty = true;
 
         CreateGrid(new Vector2(reactorInfo.gridSize[0], reactorInfo.gridSize[1]), 
@@ -686,6 +684,8 @@ public class ReactorManager : MonoBehaviour
                    isLoadGame);
         CalcMaxHeat();
         CalcMaxPower();
+        Heat = reactor.heat;
+        Power = reactor.power;
     }
 
     internal void SaveCells()
@@ -706,6 +706,14 @@ public class ReactorManager : MonoBehaviour
                     };
                 }
             }
+        }
+    }
+
+    internal void CheckPlayerBankruptcy()
+    {
+        if (isEmpty && PlayerManager.Instance?.Money < 10 && Power == 0)
+        {
+            buttonIncreaceMoney.gameObject.SetActive(true);
         }
     }
 }

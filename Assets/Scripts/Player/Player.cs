@@ -10,6 +10,7 @@ public class Player
     public bool pauseMode;
     public bool autoReplaceMode;
     public float money;
+    public float maxMoney;
     public Dictionary<UpgradeType, int> upgrades;
     public Reactor reactor;
 }

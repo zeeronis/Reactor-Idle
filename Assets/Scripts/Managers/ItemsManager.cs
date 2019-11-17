@@ -128,12 +128,13 @@ public class ItemsManager: MonoBehaviour
 
     internal void CheckBlockedItems(bool isOpenCheck, bool isCloseCheck)
     {
-        var playerMoney = PlayerManager.Instance.player.money;
+        int openModify = 3;
+        var playerMaxMoney = PlayerManager.Instance.player.maxMoney;
         foreach (var item in itemsInfo)
         {
             for (int i = 0; i < item.Value.Length; i++)
             {
-                if (item.Value[i].cost / 4 < playerMoney)
+                if (item.Value[i].cost / openModify < playerMaxMoney)
                 {
                     if (isOpenCheck)
                     {
@@ -155,7 +156,7 @@ public class ItemsManager: MonoBehaviour
 
         foreach (var item in upgradesInfo)
         {
-            if(item.Value.costBase / 4 < playerMoney)
+            if(item.Value.costBase / openModify < playerMaxMoney)
             {
                 if (isOpenCheck && item.Value.shopUpgrade != null)
                 {
