@@ -61,7 +61,8 @@ public class ReactorManager : MonoBehaviour
     }
 
     private GameObject preBuyItemPrefab;
-    public bool buildMod = false;
+    public bool buildMod;
+    public bool TouchCellsIsBlocked { get; set; }
 
     public float Power
     {
@@ -107,7 +108,6 @@ public class ReactorManager : MonoBehaviour
             heatBar.maxValue = maxHeat;
         }
     }
-
 
 
     private void Start()
@@ -614,7 +614,7 @@ public class ReactorManager : MonoBehaviour
 
     internal void BuyReactor(int reactorType)
     {
-        if (reactor.heat == 0 || reactor.power == 0)
+        if (reactor.heat == 0 && reactor.power == 0)
         {
             ReactorInfo reactorInfo = ItemsManager.Instance.reactorsInfo[reactorType];
             Player player = PlayerManager.Instance.player;

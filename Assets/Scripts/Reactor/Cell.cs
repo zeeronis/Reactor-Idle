@@ -13,6 +13,8 @@ public class Cell : MonoBehaviour
 
     private void OnMouseDown()
     {
+        if (ReactorManager.Instance.TouchCellsIsBlocked) return;
+
         mouseDownCell = this;
         if (cellItem == null || cellItem.ItemType == ItemType.Rod && cellItem.durability <= 0 )
         {
@@ -26,6 +28,8 @@ public class Cell : MonoBehaviour
 
     private void OnMouseUp()
     {
+        if (ReactorManager.Instance.TouchCellsIsBlocked) return;
+
         if (mouseDownCell == this)
         {
             if (isBuildAction && ReactorManager.Instance.buildMod)

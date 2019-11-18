@@ -47,15 +47,15 @@ public class RodInfo: ItemInfo
         if (gradeType < 3)
             return PlayerManager.Instance.player.upgrades[UpgradeType.RodGreen_AutoReplace] == 1 ? true : false;
         if (gradeType < 6)
-            return PlayerManager.Instance.player.upgrades[UpgradeType.RodYellow_PowerEff] == 1 ? true : false;
+            return PlayerManager.Instance.player.upgrades[UpgradeType.RodYellow_AutoReplace] == 1 ? true : false;
         if (gradeType < 9)
-            return PlayerManager.Instance.player.upgrades[UpgradeType.RodBlue_PowerEff] == 1 ? true : false;
+            return PlayerManager.Instance.player.upgrades[UpgradeType.RodBlue_AutoReplace] == 1 ? true : false;
         if (gradeType < 12)
-            return PlayerManager.Instance.player.upgrades[UpgradeType.RodPurple_PowerEff] == 1 ? true : false;
+            return PlayerManager.Instance.player.upgrades[UpgradeType.RodPurple_AutoReplace] == 1 ? true : false;
         if (gradeType < 15)
-            return PlayerManager.Instance.player.upgrades[UpgradeType.RodRed_PowerEff] == 1 ? true : false;
+            return PlayerManager.Instance.player.upgrades[UpgradeType.RodRed_AutoReplace] == 1 ? true : false;
         if (gradeType < 18)
-            return PlayerManager.Instance.player.upgrades[UpgradeType.RodOrange_PowerEff] == 1 ? true : false;
+            return PlayerManager.Instance.player.upgrades[UpgradeType.RodOrange_AutoReplace] == 1 ? true : false;
         return false;
     }
 }
