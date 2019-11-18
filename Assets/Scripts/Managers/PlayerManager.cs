@@ -5,6 +5,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEngine.UI.Dropdown;
 
 public class PlayerManager : MonoBehaviour
 {
@@ -23,6 +24,8 @@ public class PlayerManager : MonoBehaviour
     private Button autoReplaceButton;
     [SerializeField]
     private Sprite[] autoReplaceSprites;
+    [SerializeField]
+    private Dropdown langsDropDown;
     public RectTransform UICanvasRect;
     #pragma warning restore CS0649
 
@@ -92,6 +95,11 @@ public class PlayerManager : MonoBehaviour
         if (Instance == null)
             Instance = this;
 
+        foreach (var item in LocalizeText.supportedLangs)
+        {
+            langsDropDown.options.Add(new OptionData(item.ToString()));
+        }
+
         #if UNITY_ANDROID
         savePath = Application.persistentDataPath + "/pData.bytes";
         #endif
@@ -141,6 +149,7 @@ public class PlayerManager : MonoBehaviour
     {
         player = new Player
         {
+            language = SystemLanguage.English,
             upgrades = new Dictionary<UpgradeType, int>(),
             reactor = new Reactor() { gradeType = 0 },
             autoSaveDelay = 60
@@ -150,12 +159,26 @@ public class PlayerManager : MonoBehaviour
             player.upgrades.Add(upgradeType, 0);
         }
 
-        AutoReplaceMode = false;
-        PauseMode = false;
         Money = 10;
         ReactorManager.Instance.InitReactor(player.reactor, false);
+        LocalizeText.SetCurrentLocalization(player.language);
+        UpdateValueForLangsDropDown();
 
+        AutoReplaceMode = false;
+        PauseMode = false;
         IsReady = true;
+    }
+
+    private void UpdateValueForLangsDropDown()
+    {
+        for (int i = 0; i < LocalizeText.supportedLangs.Length; i++)
+        {
+            if (LocalizeText.supportedLangs[i] == player.language)
+            {
+                langsDropDown.value = i;
+                return;
+            }
+        }
     }
 
     internal bool BuyUpgrade(UpgradeType upgradeType)
@@ -185,6 +208,12 @@ public class PlayerManager : MonoBehaviour
     public void ChangePauseMode()
     {
         PauseMode = !player.pauseMode;
+    }
+
+    public void ChangeLanguage(int index)
+    {
+        player.language = LocalizeText.supportedLangs[index];
+        LocalizeText.SetCurrentLocalization(player.language);
     }
 
     public void AutoSaveValueChanged(int index)
@@ -249,6 +278,9 @@ public class PlayerManager : MonoBehaviour
         PauseMode = player.pauseMode;
         AutoReplaceMode = player.autoReplaceMode;
         nextSaveTime = Time.time + player.autoSaveDelay;
+        LocalizeText.SetCurrentLocalization(player.language);
+        UpdateValueForLangsDropDown();
+
         PauseMode = false;
     }
 

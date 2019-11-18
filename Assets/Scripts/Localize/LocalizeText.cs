@@ -10,16 +10,22 @@ public class LocalizeText : MonoBehaviour
 
     private static SystemLanguage currentLanguage;
     private static bool currentLanguageHasBeenSet = false;
+    public static SystemLanguage[] supportedLangs = new SystemLanguage[] 
+    {
+        SystemLanguage.English, SystemLanguage.Russian
+    };
     public static Dictionary<string, string> CurrentLanguageStrings = new Dictionary<string, string>();
     private static TextAsset currentLocalizationText;
 
     public static void SetCurrentLocalization(SystemLanguage language)
     {
+        if (currentLanguage == language) return;
         currentLanguage = language;
         currentLocalizationText = Resources.Load(LOCALIZATION_FOLDER + language.ToString(), typeof(TextAsset)) as TextAsset;
         if(currentLocalizationText == null)
         {
             Debug.LogFormat("Missing locale {0}", language.ToString());
+            SetCurrentLocalization(SystemLanguage.English);
         }
         else
         {
@@ -52,7 +58,7 @@ public class LocalizeText : MonoBehaviour
         if (!currentLanguageHasBeenSet)
         {
             currentLanguageHasBeenSet = true;
-            SetCurrentLocalization(SystemLanguage.Russian);
+            SetCurrentLocalization(SystemLanguage.English);
         }
         UpdateLocale();
     }

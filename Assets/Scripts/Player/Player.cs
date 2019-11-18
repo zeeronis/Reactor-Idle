@@ -6,6 +6,7 @@ using UnityEngine;
 [Serializable]
 public class Player
 {
+    public SystemLanguage language;
     public int autoSaveDelay;
     public bool pauseMode;
     public bool autoReplaceMode;

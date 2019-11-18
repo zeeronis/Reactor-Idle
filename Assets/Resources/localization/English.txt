@@ -1,0 +1,96 @@
+﻿UI.SellPower = Sell power
+UI.DecreaseHeat = Decrease heat
+UI.Cost = Cost:
+UI.Size = Size:
+UI.AutoSave = Auto save every
+UI.EffectsVolume = Effects volume
+UI.MusicVolume = Music volume
+UI.Menu = Menu
+UI.Back = Back
+UI.ResetGame = Reset game
+UI.ExitGame = Exit & save game
+UI.ResetGame.desc = Do you really want to reset all your game progress? Your game will start over.
+UI.ResetGame.yes = Yep, i want
+UI.Cancel = Cancel
+UI.Rods = Rods:
+UI.Heat = Heat:
+UI.SpecialUpgrades = Special upgrades:
+UI.BuyReactor = Buy reactor
+UI.ReactorsShop = Reactors shop
+UI.ReactorBuyAlert = A warning! All items in the cells will be destroyed when you buy a new reactor.
+UI.ReactorBuyInfo = To purchase a reactor, you must have 0 heat and energy in the reactor storage.
+UI.PerTick = Per tick:
+UI.Language = Language
+
+Item.0_RodX1.name = Green rod х1
+Item.0_RodX2.name = Green rod х2
+Item.0_RodX4.name = Green rod х4
+Item.1_RodX1.name = Yellow rod х1
+Item.1_RodX2.name = Yellow rod х2
+Item.1_RodX4.name = Yellow rod х4
+Item.2_RodX1.name = Blue rod х1
+Item.2_RodX2.name = Blue rod х2
+Item.2_RodX4.name = Blue rod х4
+Item.3_RodX1.name = Purple rod х1
+Item.3_RodX2.name = Purple rod х2
+Item.3_RodX4.name = Purple rod х4
+Item.4_RodX1.name = Red rod х1
+Item.4_RodX2.name = Red rod х2
+Item.4_RodX4.name = Red rod х4
+Item.5_RodX1.name = Orange rod х1
+Item.5_RodX2.name = Orange rod х2
+Item.5_RodX4.name = Orange rod х4
+Item.Rod.desc = Выдаёт {0} энергии и {1} тепла каждый тик. Тепло распределяется между соседними клетками.
+
+Item.0_Vent_1.name = Basic fan
+Item.0_Vent_2.name = Improved fan
+Item.0_Vent_3.name = Heat fan
+Item.0_Vent_4.name = Advanced fan
+Item.0_Vent_5.name = Phase fan
+Item.Vent.desc = Cools herself down on {0} warmth every tick.
+
+Item.0_Pipe_1.name = Basic pipe
+Item.0_Pipe_2.name = Improved pipe
+Item.0_Pipe_3.name = Heat pipe
+Item.0_Pipe_4.name = Advanced pipe
+Item.0_Pipe_5.name = Phase pipe
+Item.Pipe.desc = Distributes its heat between adjacent cells.
+
+Item.0_Plate_1.name = Basic plate
+Item.0_Plate_2.name = Improved plate
+Item.0_Plate_3.name = Advanced plate
+Item.0_Plate_4.name = Advanced plate
+Item.0_Plate_5.name = Reinforced plate
+Item.Plate.desc = Increases the maximum amount of heat in the reactor by {0}.
+
+Item.0_Battery_1.name = Basic battery
+Item.0_Battery_2.name = Compact battery
+Item.0_Battery_3.name = Experimental battery
+Item.0_Battery_4.name = Stabilized battery
+Item.0_Battery_5.name = Perfect battery
+Item.Battery.desc = Increases the maximum amount of stored energy in the reactor by {0}.
+
+
+Upgrade.Rods_time.title = Improved duration
+Upgrade.Rods_time.desc = Increases operating time by 100% for each upgrade level.
+Upgrade.Rods_power.title = Improved efficiency
+Upgrade.Rods_power.desc = Energy production is increased by 100% for each level of upgrade.
+Upgrade.Rods_auto.title = Automatic replacement
+Upgrade.Rods_auto.desc = Automatically replaces the rod for 1.5 of its value.
+Upgrade.NeighborinRods.title = Neighbouring rods
+Upgrade.NeighborinRods.desc = Increases the energy productivity of the rod for each adjacent rods by 0.05% for each upgrade level.
+
+Upgrade_Durability.title = Improved durability
+Upgrade.Plate_Durability.desc = Increases the stored heat of the plates by 100% for each upgrade level.
+Upgrade.Battery_Durability.desc = Increases the stored energy of batteries by 100% for each upgrade level.
+Upgrade.Pipe_Durability.desc = Increases pipe strength by 100% for each level of upgrade.
+Upgrade.Vent_Durability.desc = Increases the strength of the fans by 100% for each upgrade level.
+Upgrade.Eff.title = Improving Efficiency
+Upgrade.Pipe_Eff.desc = Improves thermal conductivity by 100% for each level of upgrade.
+Upgrade.Vent_Eff.desc = Improves cooling by 100% for each upgrade level.
+
+Upgrade.AutoSellPower.title = Auto-sell power
+Upgrade.AutoSellPower.desc = Sells 1% of the maximum energy for each level of upgrade.
+
+Upgrade.AutoDecreaseHeat.title = Auto-decreace heat
+Upgrade.AutoDecreaseHeat.desc = Reduces 1% of the heat from the maximum for each level of upgrade..
