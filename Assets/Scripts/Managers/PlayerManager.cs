@@ -315,7 +315,7 @@ public class PlayerManager : MonoBehaviour
         PauseMode = false;
     }
 
-    private bool isButtonExit;
+    private bool isButtonExit = false;
     public void ExitGame()
     {
         Save(false);

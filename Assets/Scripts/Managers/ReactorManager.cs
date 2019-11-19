@@ -73,9 +73,9 @@ public class ReactorManager : MonoBehaviour
         }
         private set
         {
-            reactor.power = value <= MaxPower ? maxPower: MaxPower;
+            reactor.power = value <= maxPower ? value : MaxPower;
             powerBar.value = value;
-            powerText.text = Formatter.BigNumbersFormat(value) + " / " + Formatter.BigNumbersFormat(maxPower);
+            powerText.text = Formatter.BigNumbersFormat(reactor.power) + " / " + Formatter.BigNumbersFormat(maxPower);
         }
     }
     public float Heat
@@ -86,9 +86,9 @@ public class ReactorManager : MonoBehaviour
         }
         private set
         {
-            reactor.heat = value <= MaxHeat ? maxHeat : MaxHeat;
+            reactor.heat = value <= maxHeat ? value : MaxHeat;
             heatBar.value = value;
-            heatText.text = Formatter.BigNumbersFormat(value) + " / " + Formatter.BigNumbersFormat(maxPower);
+            heatText.text = Formatter.BigNumbersFormat(reactor.heat) + " / " + Formatter.BigNumbersFormat(maxPower);
         }
     }
     public float MaxPower
