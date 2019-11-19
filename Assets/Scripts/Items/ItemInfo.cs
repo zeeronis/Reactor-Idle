@@ -15,6 +15,7 @@ public class ItemInfo
 
     public float durability;
     public float cost;
+    public float openCost;
     public string keyName;
     public string keyDesc;
 

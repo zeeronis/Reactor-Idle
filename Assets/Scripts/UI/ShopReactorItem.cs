@@ -25,7 +25,7 @@ public class ShopReactorItem: MonoBehaviour
         ReactorInfo info = ItemsManager.Instance.reactorsInfo[reactorType];
         nameText.text = "Mk." + reactorType;
         sizeText.text = info.gridSize[0] + "x" + info.gridSize[0];
-        costText.text = info.cost + "$";
+        costText.text = Formatter.BigNumbersFormat(info.cost);
     }
 
     public void BuyButtonClick()

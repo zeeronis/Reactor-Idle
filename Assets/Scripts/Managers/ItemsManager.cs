@@ -65,6 +65,9 @@ public class ItemsManager: MonoBehaviour
 
         //Generate.Run(true); 
 
+        float openClosedItemMultipler = 2.5f;
+
+        //LOAD ITEMS
         TextAsset asset = Resources.Load("Items") as TextAsset;
         BinaryFormatter formatter = new BinaryFormatter();
 
@@ -88,8 +91,11 @@ public class ItemsManager: MonoBehaviour
         for (int i = 0; i < shopitems.Length; i++)
         {
             itemsInfo[shopitems[i].itemType][shopitems[i].itemGradeType].shopItem = shopitems[i];
+            itemsInfo[shopitems[i].itemType][shopitems[i].itemGradeType].openCost = 
+                itemsInfo[shopitems[i].itemType][shopitems[i].itemGradeType].cost / openClosedItemMultipler;
         }
 
+        //LOAD UPGRADES
         asset = Resources.Load("Upgrades") as TextAsset;
         using (Stream stream = new MemoryStream(asset.bytes))
         {
@@ -100,8 +106,11 @@ public class ItemsManager: MonoBehaviour
         {
             upgradesInfo[upgradeItems[i].UpgradeType].shopUpgrade = upgradeItems[i];
             upgradesInfo[upgradeItems[i].UpgradeType].defaultSprite = upgradeItems[i].GetComponentsInChildren<Image>(true)[1].sprite;
+            upgradesInfo[upgradeItems[i].UpgradeType].openCost = 
+                upgradesInfo[upgradeItems[i].UpgradeType].costBase / openClosedItemMultipler;
         }
 
+        //LOAD REACTORS
         asset = Resources.Load("Reactors") as TextAsset;
         using (Stream stream = new MemoryStream(asset.bytes))
         {
@@ -114,7 +123,8 @@ public class ItemsManager: MonoBehaviour
                 .GetComponent<ShopReactorItem>().SetInfo(i);
         }
 
-        itemInfoPanel = Instantiate(itemInfoPanelPrefab, Vector3.zero, Quaternion.identity, UICanvasTransform).GetComponent<ItemInfoPanel>();
+        itemInfoPanel = Instantiate(itemInfoPanelPrefab, Vector3.zero, Quaternion.identity, 
+                                    UICanvasTransform).GetComponent<ItemInfoPanel>();
         itemInfoPanel.gameObject.SetActive(false);
 
         heatPlatePrefabs = null;
@@ -128,13 +138,12 @@ public class ItemsManager: MonoBehaviour
 
     internal void CheckBlockedItems(bool isOpenCheck, bool isCloseCheck)
     {
-        int openModify = 3;
         var playerMaxMoney = PlayerManager.Instance.player.maxMoney;
         foreach (var item in itemsInfo)
         {
             for (int i = 0; i < item.Value.Length; i++)
             {
-                if (item.Value[i].cost / openModify < playerMaxMoney)
+                if (item.Value[i].openCost < playerMaxMoney)
                 {
                     if (isOpenCheck)
                     {
@@ -156,7 +165,7 @@ public class ItemsManager: MonoBehaviour
 
         foreach (var item in upgradesInfo)
         {
-            if(item.Value.costBase / openModify < playerMaxMoney)
+            if(item.Value.openCost < playerMaxMoney)
             {
                 if (isOpenCheck && item.Value.shopUpgrade != null)
                 {

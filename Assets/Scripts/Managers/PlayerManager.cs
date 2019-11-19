@@ -45,7 +45,7 @@ public class PlayerManager : MonoBehaviour
         set
         {
             player.money = value;
-            moneyText.text = value.ToString() + " $";
+            moneyText.text = Formatter.BigNumbersFormat(value);
             if (player.maxMoney < value) player.maxMoney = value;
         }
     }

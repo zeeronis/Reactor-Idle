@@ -36,7 +36,7 @@ public class ShopItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         ItemInfo itemInfo = ItemsManager.Instance.itemsInfo[itemType][itemGradeType];
         ItemInfoPanel infoPanel = ItemsManager.Instance.itemInfoPanel;
         infoPanel.itemName.text = LocalizeText.CurrentLanguageStrings[itemInfo.keyName];
-        infoPanel.itemCost.text = itemInfo.cost + " $";
+        infoPanel.itemCost.text = Formatter.BigNumbersFormat(itemInfo.cost);
         infoPanel.itemDescription.text = itemInfo.GetLocaleDesc(LocalizeText.CurrentLanguageStrings[itemInfo.keyDesc]);
 
         infoPanel.SetPosition(Input.mousePosition);

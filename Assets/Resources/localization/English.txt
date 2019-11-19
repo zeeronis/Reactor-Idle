@@ -54,7 +54,7 @@ Item.0_Pipe_2.name = Improved pipe
 Item.0_Pipe_3.name = Heat pipe
 Item.0_Pipe_4.name = Advanced pipe
 Item.0_Pipe_5.name = Phase pipe
-Item.Pipe.desc = Distributes its heat between adjacent cells.
+Item.Pipe.desc = Distributes its heat between adjacent cells. Throughput {0}.
 
 Item.0_Plate_1.name = Basic plate
 Item.0_Plate_2.name = Improved plate

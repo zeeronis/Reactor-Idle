@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -22,9 +21,11 @@ public class ReactorManager : MonoBehaviour
     private Reactor reactor;
     private float maxPower;
     private float maxHeat;
+    private float lastPowerInc;
+    private float lastHeatInc;
 
     private Cell[,] cellsGrid;
-    private Dictionary<ItemType, List<Cell>> itemsDictionary = new Dictionary<ItemType, List<Cell>>()
+    private Dictionary<ItemType, List<Cell>> reactorItems = new Dictionary<ItemType, List<Cell>>()
     {
         [ItemType.Rod] = new List<Cell>(),
         [ItemType.HeatPipe] = new List<Cell>(),
@@ -74,7 +75,7 @@ public class ReactorManager : MonoBehaviour
         {
             reactor.power = value <= MaxPower ? value: MaxPower;
             powerBar.value = value;
-            powerText.text = reactor.power + " / " + MaxPower;
+            powerText.text = Formatter.BigNumbersFormat(value) + " / " + Formatter.BigNumbersFormat(maxPower);
         }
     }
     public float Heat
@@ -87,7 +88,7 @@ public class ReactorManager : MonoBehaviour
         {
             reactor.heat = value <= MaxHeat ? value : MaxHeat;
             heatBar.value = value;
-            heatText.text = reactor.heat + " / " + MaxHeat;
+            heatText.text = Formatter.BigNumbersFormat(value) + " / " + Formatter.BigNumbersFormat(maxPower);
         }
     }
     public float MaxPower
@@ -150,11 +151,11 @@ public class ReactorManager : MonoBehaviour
         _destroyList.Clear();
         if (reactor.heat == MaxHeat)
         {
-            for (int i = 0; i < itemsDictionary.Count; i++)
+            for (int i = 0; i < reactorItems.Count; i++)
             {
-                for (int j = 0; j < itemsDictionary[(ItemType)i].Count; j++)
+                for (int j = 0; j < reactorItems[(ItemType)i].Count; j++)
                 {
-                    DestroyItem(itemsDictionary[(ItemType)i][j], true);
+                    DestroyItem(reactorItems[(ItemType)i][j], true);
                 }
             }
             IsEmpty = true;
@@ -169,45 +170,50 @@ public class ReactorManager : MonoBehaviour
         float rodMultipler;
         float upgradeEffMultipler = 1;
         var playerUpgrades = PlayerManager.Instance.player.upgrades;
+        IItem cellItem;
 
         //Rods
-        foreach (var cell in itemsDictionary[ItemType.Rod])
+        foreach (var cell in reactorItems[ItemType.Rod])
         {
             rodMultipler = 1;
-            upgradeEffMultipler = RodInfo.GetRodEffMultipler(cell.cellItem.itemGradeType);
+            cellItem = cell.cellItem;
+            int cellX = (int)cell.cellIndex.x;
+            int cellY = (int)cell.cellIndex.y;
+            upgradeEffMultipler = RodInfo.GetRodEffMultipler(cellItem.itemGradeType);
             _selectedItems.Clear();
-            if (cell.cellIndex.y > 0) //up
+
+            if (cellY > 0) //up
             {
-                _selectedCell = cellsGrid[(int)cell.cellIndex.x, (int)cell.cellIndex.y - 1];
+                _selectedCell = cellsGrid[cellX, cellY - 1];
                 if (_selectedCell.cellItem?.ItemType == ItemType.Rod)
                     rodMultipler += playerUpgrades[UpgradeType.Neighboring_Rods_Eff] * 0.05f; 
                 CheckSelectedCell();
             }
-            if(cell.cellIndex.y < cellsGrid.GetLength(1) - 1) //down
+            if(cellY < cellsGrid.GetLength(1) - 1) //down
             {
-                _selectedCell = cellsGrid[(int)cell.cellIndex.x, (int)cell.cellIndex.y + 1];
+                _selectedCell = cellsGrid[cellX, cellY + 1];
                 if (_selectedCell.cellItem?.ItemType == ItemType.Rod)
                     rodMultipler += playerUpgrades[UpgradeType.Neighboring_Rods_Eff] * 0.05f;
                 CheckSelectedCell();
             }
-            if (cell.cellIndex.x > 0) //left
+            if (cellX > 0) //left
             {
-                _selectedCell = cellsGrid[(int)cell.cellIndex.x - 1, (int)cell.cellIndex.y];
+                _selectedCell = cellsGrid[cellX - 1, cellY];
                 if (_selectedCell.cellItem?.ItemType == ItemType.Rod)
                     rodMultipler += playerUpgrades[UpgradeType.Neighboring_Rods_Eff] * 0.05f;
                 CheckSelectedCell();
             }
-            if (cell.cellIndex.x < cellsGrid.GetLength(0) - 1) //right
+            if (cellX < cellsGrid.GetLength(0) - 1) //right
             {
-                _selectedCell = cellsGrid[(int)cell.cellIndex.x + 1, (int)cell.cellIndex.y];
+                _selectedCell = cellsGrid[cellX + 1, cellY];
                 if (_selectedCell.cellItem?.ItemType == ItemType.Rod)
                     rodMultipler += playerUpgrades[UpgradeType.Neighboring_Rods_Eff] * 0.05f;
                 CheckSelectedCell();
             }
 
-            cell.cellItem.durability--;
-            cell.cellItem.UpdateDurabilityBar();
-            RodInfo rodInfo = (RodInfo)ItemsManager.Instance.itemsInfo[cell.cellItem.ItemType][cell.cellItem.itemGradeType];
+            cellItem.durability--;
+            cellItem.UpdateDurabilityBar();
+            RodInfo rodInfo = (RodInfo)ItemsManager.Instance.itemsInfo[cellItem.ItemType][cellItem.itemGradeType];
             if(_selectedItems.Count != 0)
             {
                 float heatPerCell = (rodInfo.outHeat * rodMultipler) / _selectedItems.Count;
@@ -223,7 +229,7 @@ public class ReactorManager : MonoBehaviour
             addPower += (rodInfo.outPower * upgradeEffMultipler) * rodMultipler;
 
             //destroy rod check
-            if(cell.cellItem.durability <= 0)
+            if(cellItem.durability <= 0)
             {
                 _destroyList.Add(cell);
             }
@@ -232,54 +238,58 @@ public class ReactorManager : MonoBehaviour
 
         //Pipes
         upgradeEffMultipler = 1 + playerUpgrades[UpgradeType.Pipe_Eff];
-        foreach (var cell in itemsDictionary[ItemType.HeatPipe])
+        foreach (var cell in reactorItems[ItemType.HeatPipe])
         {
             if(cell.cellItem.heat != 0)
             {
+                cellItem = cell.cellItem;
+                int cellX = (int)cell.cellIndex.x;
+                int cellY = (int)cell.cellIndex.y;
                 _selectedItems.Clear();
-                if (cell.cellIndex.y > 0) //up
+                if (cellY > 0) //up
                 {
-                    _selectedCell = cellsGrid[(int)cell.cellIndex.x, (int)cell.cellIndex.y - 1];
+                    _selectedCell = cellsGrid[cellX, cellY - 1];
                     CheckSelectedCell();
                 }
-                if (cell.cellIndex.y < cellsGrid.GetLength(1) - 1) //down
+                if (cellY < cellsGrid.GetLength(1) - 1) //down
                 {
-                    _selectedCell = cellsGrid[(int)cell.cellIndex.x, (int)cell.cellIndex.y + 1];
+                    _selectedCell = cellsGrid[cellX, cellY + 1];
                     CheckSelectedCell();
                 }
                 if (cell.cellIndex.x > 0) //left
                 {
-                    _selectedCell = cellsGrid[(int)cell.cellIndex.x - 1, (int)cell.cellIndex.y];
+                    _selectedCell = cellsGrid[cellX - 1, cellY];
                     CheckSelectedCell();
                 }
                 if (cell.cellIndex.x < cellsGrid.GetLength(0) - 1) //right
                 {
-                    _selectedCell = cellsGrid[(int)cell.cellIndex.x + 1, (int)cell.cellIndex.y];
+                    _selectedCell = cellsGrid[cellX + 1, cellY];
                     CheckSelectedCell();
                 }
 
                 for (int i = 0; i < _selectedItems.Count; i++)
                 {
-                    if (_selectedItems[i].heat > cell.cellItem.heat)
+                    if (_selectedItems[i].heat > cellItem.heat)
                     {
                         _selectedItems.Remove(_selectedItems[i]);
                         i--;
                     }
                 }
-                HeatPipeInfo pipeInfo = (HeatPipeInfo)ItemsManager.Instance.itemsInfo[cell.cellItem.ItemType][cell.cellItem.itemGradeType];
+
+                HeatPipeInfo pipeInfo = (HeatPipeInfo)ItemsManager.Instance.itemsInfo[cellItem.ItemType][cellItem.itemGradeType];
                 if (_selectedItems.Count != 0)
                 {
                     float heatPerCell = 0;
                     float heatThroughput = pipeInfo.heatThroughput * upgradeEffMultipler;
-                    if (cell.cellItem.heat <= heatThroughput)
+                    if (cellItem.heat <= heatThroughput)
                     {
-                        heatPerCell = cell.cellItem.heat / _selectedItems.Count;
-                        cell.cellItem.heat = 0;
+                        heatPerCell = cellItem.heat / _selectedItems.Count;
+                        cellItem.heat = 0;
                     }
                     else
                     {
                         heatPerCell = heatThroughput / _selectedItems.Count;
-                        cell.cellItem.heat -= heatThroughput;
+                        cellItem.heat -= heatThroughput;
                     }
 
                     foreach (var item in _selectedItems)
@@ -287,10 +297,10 @@ public class ReactorManager : MonoBehaviour
                         item.heat += heatPerCell;
                     }
                 }
-                cell.cellItem.UpdateHeatBar();
+                cellItem.UpdateHeatBar();
 
                 //destroy pipe check
-                if (cell.cellItem.durability <= cell.cellItem.heat)
+                if (cellItem.durability <= cellItem.heat)
                 {
                     _destroyList.Add(cell);
                 }
@@ -300,18 +310,27 @@ public class ReactorManager : MonoBehaviour
 
         //Vents
         upgradeEffMultipler = 1 + playerUpgrades[UpgradeType.Vent_Eff];
-        foreach (var cell in itemsDictionary[ItemType.HeatVent])
+        foreach (var cell in reactorItems[ItemType.HeatVent])
         {
-            HeatVentInfo pipeInfo = (HeatVentInfo)ItemsManager.Instance.itemsInfo[cell.cellItem.ItemType][cell.cellItem.itemGradeType];
-            cell.cellItem.heat -= pipeInfo.decreaseHeat * upgradeEffMultipler;
-            if (cell.cellItem.heat < 0)
-                cell.cellItem.heat = 0;
-            cell.cellItem.UpdateHeatBar();
+            cellItem = cell.cellItem;
+            HeatVentInfo pipeInfo = (HeatVentInfo)ItemsManager.Instance.itemsInfo[cellItem.ItemType][cellItem.itemGradeType];
 
-            //destroy vent check
-            if (cell.cellItem.durability <= cell.cellItem.heat)
+            if (cellItem.heat > 0)
             {
-                _destroyList.Add(cell);
+                cellItem.heat -= pipeInfo.decreaseHeat * upgradeEffMultipler;
+                if (cellItem.heat < 0)
+                    cellItem.heat = 0;
+                if((cellItem.lastHeat != cellItem.heat))
+                {
+                    cellItem.UpdateHeatBar();
+                    cellItem.lastHeat = cellItem.heat;
+                }
+               
+                //destroy vent check
+                if (cellItem.durability <= cellItem.heat)
+                {
+                    _destroyList.Add(cell);
+                }
             }
         }
 
@@ -319,13 +338,14 @@ public class ReactorManager : MonoBehaviour
         //destroy
         foreach (var cell in _destroyList)
         {
-            if (cell.cellItem.ItemType == ItemType.Rod)
+            cellItem = cell.cellItem;
+            if (cellItem.ItemType == ItemType.Rod)
             {
-                itemsDictionary[ItemType.Rod].Remove(cell);
+                reactorItems[ItemType.Rod].Remove(cell);
                 usedRodsList.Add(cell);
-                cell.cellItem.GetComponent<SpriteRenderer>().color = new Color32(255, 255, 255, 128);
-                cell.cellItem.hpBar.gameObject.SetActive(false);
-                cell.cellItem.durability = 0;
+                cellItem.GetComponent<SpriteRenderer>().color = new Color32(255, 255, 255, 128);
+                cellItem.hpBar.gameObject.SetActive(false);
+                cellItem.durability = 0;
             }
             else
             {
@@ -346,16 +366,24 @@ public class ReactorManager : MonoBehaviour
         }
 
         //UI//Heat//Energy//Money
-        Heat += addHeat;
-        Power += addPower;
-        heatMonitorText.text = "+" + addHeat;
-        powerMonitorText.text = "+" + addPower;
+        if(addHeat > 0) Heat += addHeat;
+        if(addPower > 0) Power += addPower;
+        if(addHeat != lastHeatInc)
+        {
+            heatMonitorText.text = "+" + Formatter.BigNumbersFormat(addHeat);
+            lastHeatInc = addHeat;
+        }
+        if(addPower != lastPowerInc)
+        {
+            powerMonitorText.text = "+" + Formatter.BigNumbersFormat(addPower);
+            lastPowerInc = addPower;
+        }
 
         float canDecreaseHeat = maxHeat / 100 * playerUpgrades[UpgradeType.AutoDecreaseHeat];
-        Heat -= reactor.heat < canDecreaseHeat ? reactor.heat : canDecreaseHeat;
+        if(reactor.heat > 0) Heat -= reactor.heat < canDecreaseHeat ? reactor.heat : canDecreaseHeat;
         float canSellPower = maxPower / 100 * playerUpgrades[UpgradeType.AutoSellPower];
         float soldPower = reactor.power < canSellPower ? reactor.power : canSellPower;
-        Power -= soldPower;
+        if(soldPower > 0) Power -= soldPower;
         PlayerManager.Instance.Money += addMoney + soldPower;
 
         #if UNITY_EDITOR
@@ -391,7 +419,7 @@ public class ReactorManager : MonoBehaviour
         }
         else
         {
-            itemsDictionary[cell.cellItem.ItemType].Remove(cell);
+            reactorItems[cell.cellItem.ItemType].Remove(cell);
         }
       
         if (explosion)
@@ -511,7 +539,7 @@ public class ReactorManager : MonoBehaviour
         }
         else
         {
-            itemsDictionary[newItem.ItemType].Add(cell);
+            reactorItems[newItem.ItemType].Add(cell);
         }
     }
 
@@ -575,7 +603,7 @@ public class ReactorManager : MonoBehaviour
         }
         
         DestroyItem(cell, false);
-        foreach (var item in itemsDictionary)
+        foreach (var item in reactorItems)
         {
             if (item.Value.Count != 0)
                 return;
@@ -630,7 +658,7 @@ public class ReactorManager : MonoBehaviour
     internal void CalcMaxHeat()
     {
         float maxHeat = ItemsManager.Instance.reactorsInfo[reactor.gradeType].baseMaxHeat;
-        foreach (var item in itemsDictionary[ItemType.HeatPlate])
+        foreach (var item in reactorItems[ItemType.HeatPlate])
         {
             maxHeat += ItemsManager.Instance
                 .itemsInfo[item.cellItem.ItemType][item.cellItem.itemGradeType].durability 
@@ -642,7 +670,7 @@ public class ReactorManager : MonoBehaviour
     internal void CalcMaxPower()
     {
         float maxPower = ItemsManager.Instance.reactorsInfo[reactor.gradeType].baseMaxPower;
-        foreach (var item in itemsDictionary[ItemType.Battery])
+        foreach (var item in reactorItems[ItemType.Battery])
         {
             maxPower += ItemsManager.Instance
                 .itemsInfo[item.cellItem.ItemType][item.cellItem.itemGradeType].durability
@@ -661,7 +689,7 @@ public class ReactorManager : MonoBehaviour
             usedRodsList.Clear();
             foreach (ItemType itemType in Enum.GetValues(typeof(ItemType)))
             {
-                itemsDictionary[itemType].Clear();
+                reactorItems[itemType].Clear();
             }
             for (int row = 0; row < cellsGrid.GetLength(0); row++)
             {

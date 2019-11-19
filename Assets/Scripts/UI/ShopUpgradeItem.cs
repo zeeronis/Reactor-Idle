@@ -37,7 +37,8 @@ public class ShopUpgradeItem : MonoBehaviour, IPointerEnterHandler, IPointerExit
         infoPanel.itemName.text = LocalizeText.CurrentLanguageStrings[upgradeInfo.keyName];
         if(upgradeInfo.maxUpgradeLvl != PlayerManager.Instance.player.upgrades[upgradeType])
         {
-            infoPanel.itemCost.text = upgradeInfo.GetCost(PlayerManager.Instance.player.upgrades[upgradeType]) + " $";
+            infoPanel.itemCost.text = Formatter.BigNumbersFormat(
+                upgradeInfo.GetCost(PlayerManager.Instance.player.upgrades[upgradeType]));
         }
         else
         {

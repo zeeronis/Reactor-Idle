@@ -10,6 +10,7 @@ public class UpgradeInfo
 {
     public int maxUpgradeLvl;
     public float costBase;
+    public float openCost;
     public float costMultipler;
     public string keyName;
     public string keyDesc;

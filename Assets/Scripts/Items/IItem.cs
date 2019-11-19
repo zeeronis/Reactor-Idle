@@ -15,6 +15,7 @@ public class IItem: MonoBehaviour
     public int itemGradeType;
     public float durability;
     public float heat;
+    public float lastHeat;
 
     
     public void UpdateDurabilityBar()
