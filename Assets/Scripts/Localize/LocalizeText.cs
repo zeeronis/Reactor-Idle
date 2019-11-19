@@ -14,6 +14,7 @@ public class LocalizeText : MonoBehaviour
     {
         SystemLanguage.English, SystemLanguage.Russian
     };
+    private static List<LocalizeText> localizeTexts = new List<LocalizeText>();
     public static Dictionary<string, string> CurrentLanguageStrings = new Dictionary<string, string>();
     private static TextAsset currentLocalizationText;
 
@@ -40,7 +41,7 @@ public class LocalizeText : MonoBehaviour
                 }
             }
 
-            LocalizeText[] texts = GameObject.FindObjectsOfType<LocalizeText>();
+            LocalizeText[] texts = localizeTexts.ToArray();
             for (int i = 0; i < texts.Length; i++)
             {
                 texts[i].UpdateLocale();
@@ -48,13 +49,13 @@ public class LocalizeText : MonoBehaviour
         }
     }
 
-
     public string localizationKey;
     private Text text;
 
     private void Start()
     {
         text = GetComponent<Text>();
+        localizeTexts.Add(this);
         if (!currentLanguageHasBeenSet)
         {
             currentLanguageHasBeenSet = true;

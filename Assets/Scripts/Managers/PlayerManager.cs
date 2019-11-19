@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEngine.UI;
@@ -30,6 +31,8 @@ public class PlayerManager : MonoBehaviour
     #pragma warning restore CS0649
 
     private string savePath;
+    private const string SAVE_FILE_NAME = "/pData.bytes";
+    private const string AUTO_SAVE_FILE_NAME = "/apData.bytes";
     private float nextSaveTime = 60f;
 
     private float checkBlockItemsTime = 2f;
@@ -101,11 +104,11 @@ public class PlayerManager : MonoBehaviour
         }
 
         #if UNITY_ANDROID
-        savePath = Application.persistentDataPath + "/pData.bytes";
+        savePath = Application.persistentDataPath;
         #endif
 
         #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
-        savePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/ReactorIdle/pData.bytes";
+        savePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/ReactorIdle";
         Directory.CreateDirectory(Environment.GetFolderPath(
                           Environment.SpecialFolder.ApplicationData)
                           + "/ReactorIdle");
@@ -119,7 +122,7 @@ public class PlayerManager : MonoBehaviour
             if (Time.time > nextSaveTime)
             {
                 nextSaveTime = Time.time + player.autoSaveDelay;
-                Save();
+                Save(true);
             }
             if(Time.time > checkBlockItemsTime)
             {
@@ -132,7 +135,7 @@ public class PlayerManager : MonoBehaviour
             if (ItemsManager.IsReady && PoolManager.IsReady && ReactorManager.IsReady)
             {
                 nextSaveTime = Time.time + player.autoSaveDelay;
-                if (File.Exists(savePath))
+                if (File.Exists(savePath + SAVE_FILE_NAME) || File.Exists(savePath + AUTO_SAVE_FILE_NAME))
                 {
                     Load();
                 }
@@ -164,6 +167,7 @@ public class PlayerManager : MonoBehaviour
         LocalizeText.SetCurrentLocalization(player.language);
         UpdateValueForLangsDropDown();
 
+        nextSaveTime = Time.time + player.autoSaveDelay;
         AutoReplaceMode = false;
         PauseMode = false;
         IsReady = true;
@@ -246,13 +250,15 @@ public class PlayerManager : MonoBehaviour
         nextSaveTime = Time.time + player.autoSaveDelay;
     }
 
-    public void Save()
+    public void Save(bool isAutoSave)
     {
         PauseMode = true;
         ReactorManager.Instance.SaveCells();
         BinaryFormatter formatter = new BinaryFormatter();
 
-        using (FileStream fileStream = new FileStream(savePath, FileMode.OpenOrCreate))
+        using (FileStream fileStream = new FileStream(
+                                    savePath + (isAutoSave ? AUTO_SAVE_FILE_NAME : SAVE_FILE_NAME),
+                                    FileMode.OpenOrCreate))
         {
             formatter.Serialize(fileStream, player);
         }
@@ -262,11 +268,36 @@ public class PlayerManager : MonoBehaviour
     public void Load()
     {
         PauseMode = true;
-        BinaryFormatter formatter = new BinaryFormatter();
-        using (FileStream fileStream = new FileStream(savePath, FileMode.OpenOrCreate))
+        bool errLoad = false;
+        string saveFilePath = "";
+        if(File.GetLastWriteTime(savePath + SAVE_FILE_NAME) > File.GetLastWriteTime(savePath + AUTO_SAVE_FILE_NAME))
         {
-            player = (Player)formatter.Deserialize(fileStream);
+            saveFilePath = savePath + SAVE_FILE_NAME;
         }
+        else
+        {
+            saveFilePath = savePath + AUTO_SAVE_FILE_NAME;
+        }
+
+        BinaryFormatter formatter = new BinaryFormatter();
+        using (FileStream fileStream = new FileStream(saveFilePath, FileMode.OpenOrCreate))
+        {
+            try
+            {
+                player = (Player)formatter.Deserialize(fileStream);
+            }
+            catch (SerializationException)
+            {
+                errLoad = true;
+            }
+        }
+        if (errLoad)
+        {
+            File.Delete(saveFilePath);
+            Load();
+            return;
+        }
+
         foreach (UpgradeType upgradeType in Enum.GetValues(typeof(UpgradeType)))
         {
             if (!player.upgrades.ContainsKey(upgradeType))
@@ -284,28 +315,29 @@ public class PlayerManager : MonoBehaviour
         PauseMode = false;
     }
 
+    private bool isButtonExit;
     public void ExitGame()
     {
+        Save(false);
         Application.Quit();
     }
 
     public void ResetGame()
     {
         NewGame();
-        Save();
     }
 
     #if UNITY_ANDROID
     private void OnApplicationFocus(bool focus)
     {
-        if (!focus) Save();
+        if (!focus && !isButtonExit) Save(false);
     }
     #endif
 
     #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
     private void OnApplicationQuit()
     {
-        Save();
+        Save(false);
     }
     #endif
 }

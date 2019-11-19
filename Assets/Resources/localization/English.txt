@@ -40,14 +40,14 @@ Item.4_RodX4.name = Red rod х4
 Item.5_RodX1.name = Orange rod х1
 Item.5_RodX2.name = Orange rod х2
 Item.5_RodX4.name = Orange rod х4
-Item.Rod.desc = Выдаёт {0} энергии и {1} тепла каждый тик. Тепло распределяется между соседними клетками.
+Item.Rod.desc = Output {0} power and {1} heat every tick. Heat is distributed between neighboring cells.
 
 Item.0_Vent_1.name = Basic fan
 Item.0_Vent_2.name = Improved fan
 Item.0_Vent_3.name = Heat fan
 Item.0_Vent_4.name = Advanced fan
 Item.0_Vent_5.name = Phase fan
-Item.Vent.desc = Cools herself down on {0} warmth every tick.
+Item.Vent.desc = Cools herself, reduce heat on {0} every tick.
 
 Item.0_Pipe_1.name = Basic pipe
 Item.0_Pipe_2.name = Improved pipe
