@@ -21,6 +21,13 @@ UI.ReactorBuyAlert = A warning! All items in the cells will be destroyed when yo
 UI.ReactorBuyInfo = To purchase a reactor, you must have 0 heat and energy in the reactor storage.
 UI.PerTick = Per tick:
 UI.Language = Language
+UI.TransferPlayerData = Transfer player data
+UI.ShowPanels = Show panels
+UI.LoadSavedData = Load saved data
+UI.DataSavedString = Data saved string
+UI.LoadGame = Load game
+UI.EnterSavedString = Enter saved string...
+UI.GetSaveString = Get save string
 
 Item.0_RodX1.name = Green rod х1
 Item.0_RodX2.name = Green rod х2

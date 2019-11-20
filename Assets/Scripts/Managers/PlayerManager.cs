@@ -27,6 +27,10 @@ public class PlayerManager : MonoBehaviour
     private Sprite[] autoReplaceSprites;
     [SerializeField]
     private Dropdown langsDropDown;
+    [SerializeField]
+    private InputField LoadInputField;
+    [SerializeField]
+    private InputField SaveInputField;
     public RectTransform UICanvasRect;
     #pragma warning restore CS0649
 
@@ -185,6 +189,70 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
+    private void AfterLoadInits()
+    {
+        foreach (UpgradeType upgradeType in Enum.GetValues(typeof(UpgradeType)))
+        {
+            if (!player.upgrades.ContainsKey(upgradeType))
+                player.upgrades.Add(upgradeType, 0);
+        }
+
+        ReactorManager.Instance.InitReactor(player.reactor, true);
+        Money = player.money;
+        PauseMode = player.pauseMode;
+        AutoReplaceMode = player.autoReplaceMode;
+        nextSaveTime = Time.time + player.autoSaveDelay;
+        LocalizeText.SetCurrentLocalization(player.language);
+        UpdateValueForLangsDropDown();
+    }
+
+    private string GetBase64SaveString()
+    {
+        PauseMode = true;
+        string saveString = "";
+        ReactorManager.Instance.SaveCells();
+
+        BinaryFormatter binaryFormatter = new BinaryFormatter();
+        using (MemoryStream memoryStream = new MemoryStream())
+        {
+            binaryFormatter.Serialize(memoryStream, player);
+            saveString = Convert.ToBase64String(memoryStream.GetBuffer());
+        }
+
+        PauseMode = false;
+        return saveString;
+    }
+
+    private bool LoadFromBase64String(string base64String)
+    {
+        PauseMode = true;
+        bool successLoad = true;
+        MemoryStream memoryStream = null;
+        try
+        {
+            BinaryFormatter binaryFormatter = new BinaryFormatter();
+            memoryStream = new MemoryStream(Convert.FromBase64String(base64String));
+            player = (Player)binaryFormatter.Deserialize(memoryStream);
+            memoryStream.Dispose();
+
+            AfterLoadInits();
+        }
+        catch (Exception)
+        {
+            successLoad = false;
+        }
+        finally
+        {
+            if(memoryStream != null)
+            {
+                memoryStream.Dispose();
+            }
+        }
+        
+        PauseMode = false;
+        return successLoad;
+    }
+
     internal bool BuyUpgrade(UpgradeType upgradeType)
     {
         if (player.upgrades[upgradeType] == ItemsManager.Instance.upgradesInfo[upgradeType].maxUpgradeLvl)
@@ -298,21 +366,29 @@ public class PlayerManager : MonoBehaviour
             return;
         }
 
-        foreach (UpgradeType upgradeType in Enum.GetValues(typeof(UpgradeType)))
-        {
-            if (!player.upgrades.ContainsKey(upgradeType))
-                player.upgrades.Add(upgradeType, 0);
-        }
-
-        ReactorManager.Instance.InitReactor(player.reactor, true);
-        Money = player.money;
-        PauseMode = player.pauseMode;
-        AutoReplaceMode = player.autoReplaceMode;
-        nextSaveTime = Time.time + player.autoSaveDelay;
-        LocalizeText.SetCurrentLocalization(player.language);
-        UpdateValueForLangsDropDown();
-
+        AfterLoadInits();
         PauseMode = false;
+    }
+
+    public void LoadGameFromString_Click()
+    {
+        if(LoadInputField.text != String.Empty)
+        {
+            if (LoadFromBase64String(LoadInputField.text))
+            {
+                LoadInputField.text = String.Empty;
+            }
+            else
+            {
+                LoadInputField.text = "Incorrect load string";
+            }
+            SaveInputField.text = String.Empty;
+        }
+    }
+
+    public void SetSavedDataString_Click()
+    {
+        SaveInputField.text = GetBase64SaveString();
     }
 
     private bool isButtonExit = false;

@@ -21,6 +21,13 @@ UI.ReactorBuyAlert = Предупреждение! Все предметы в к
 UI.ReactorBuyInfo = Чтобы приобрести реактор, вы должны иметь 0 тепла и энергии в хранилище реактора.
 UI.PerTick = Каждый тик:
 UI.Language = Язык
+UI.TransferPlayerData = Перенос данных игрока
+UI.ShowPanels = Показать панели
+UI.LoadSavedData = Загрузить сохраненные данные
+UI.DataSavedString = Строка сохраненных данных
+UI.LoadGame = Загрузить игру
+UI.EnterSavedString = Введите сохраненную строку ...
+UI.GetSaveString = Получить строку сохранения
 
 Item.0_RodX1.name = Зелёный стержень х1
 Item.0_RodX2.name = Зелёный стержень х2
