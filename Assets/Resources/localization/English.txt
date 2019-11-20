@@ -28,6 +28,7 @@ UI.DataSavedString = Data saved string
 UI.LoadGame = Load game
 UI.EnterSavedString = Enter saved string...
 UI.GetSaveString = Get save string
+UI.PasteFromCB = Paste from clipboard
 
 Item.0_RodX1.name = Green rod х1
 Item.0_RodX2.name = Green rod х2

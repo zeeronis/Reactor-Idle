@@ -177,6 +177,20 @@ public class PlayerManager : MonoBehaviour
         IsReady = true;
     }
 
+    #if UNITY_ANDROID
+    private void OnApplicationFocus(bool focus)
+    {
+        if (!focus && !isButtonExit) Save(false);
+    }
+    #endif
+
+    #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+    private void OnApplicationQuit()
+    {
+        Save(false);
+    }
+    #endif
+
     private void UpdateValueForLangsDropDown()
     {
         for (int i = 0; i < LocalizeText.supportedLangs.Length; i++)
@@ -272,23 +286,23 @@ public class PlayerManager : MonoBehaviour
         return false;
     }
 
-    public void ChangeAutoReplaceRodsMode()
+    internal void ChangeAutoReplaceRodsMode()
     {
         AutoReplaceMode = !player.autoReplaceMode;
     }
 
-    public void ChangePauseMode()
+    internal void ChangePauseMode()
     {
         PauseMode = !player.pauseMode;
     }
 
-    public void ChangeLanguage(int index)
+    internal void ChangeLanguage(int index)
     {
         player.language = LocalizeText.supportedLangs[index];
         LocalizeText.SetCurrentLocalization(player.language);
     }
 
-    public void AutoSaveValueChanged(int index)
+    internal void AutoSaveValueChanged(int index)
     {
         switch (index)
         {
@@ -318,7 +332,7 @@ public class PlayerManager : MonoBehaviour
         nextSaveTime = Time.time + player.autoSaveDelay;
     }
 
-    public void Save(bool isAutoSave)
+    internal void Save(bool isAutoSave)
     {
         PauseMode = true;
         ReactorManager.Instance.SaveCells();
@@ -333,7 +347,7 @@ public class PlayerManager : MonoBehaviour
         PauseMode = false;
     }
 
-    public void Load()
+    internal void Load()
     {
         PauseMode = true;
         bool errLoad = false;
@@ -370,7 +384,7 @@ public class PlayerManager : MonoBehaviour
         PauseMode = false;
     }
 
-    public void LoadGameFromString_Click()
+    internal void LoadGameFromString_Click()
     {
         if(LoadInputField.text != String.Empty)
         {
@@ -386,34 +400,26 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    public void SetSavedDataString_Click()
+    internal void PasteSaveStrFromClipboard()
+    {
+        LoadInputField.text = GUIUtility.systemCopyBuffer;
+    }
+
+    internal void SetSavedDataString_Click()
     {
         SaveInputField.text = GetBase64SaveString();
+        GUIUtility.systemCopyBuffer = SaveInputField.text;
     }
 
     private bool isButtonExit = false;
-    public void ExitGame()
+    internal void ExitGame()
     {
         Save(false);
         Application.Quit();
     }
 
-    public void ResetGame()
+    internal void ResetGame()
     {
         NewGame();
     }
-
-    #if UNITY_ANDROID
-    private void OnApplicationFocus(bool focus)
-    {
-        if (!focus && !isButtonExit) Save(false);
-    }
-    #endif
-
-    #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
-    private void OnApplicationQuit()
-    {
-        Save(false);
-    }
-    #endif
 }

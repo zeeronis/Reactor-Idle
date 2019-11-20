@@ -28,6 +28,7 @@ UI.DataSavedString = Строка сохраненных данных
 UI.LoadGame = Загрузить игру
 UI.EnterSavedString = Введите сохраненную строку ...
 UI.GetSaveString = Получить строку сохранения
+UI.PasteFromCB = Вставить из буфера
 
 Item.0_RodX1.name = Зелёный стержень х1
 Item.0_RodX2.name = Зелёный стержень х2
