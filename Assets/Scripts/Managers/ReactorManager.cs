@@ -16,6 +16,7 @@ public class ReactorManager : MonoBehaviour
     [SerializeField] private Text heatText;
     [SerializeField] private Text powerMonitorText;
     [SerializeField] private Text heatMonitorText;
+    [SerializeField] private Text moneyMonitorText;
     [SerializeField] private Button buttonIncreaceMoney;
 
     private Reactor reactor;
@@ -23,6 +24,7 @@ public class ReactorManager : MonoBehaviour
     private float maxHeat;
     private float lastPowerInc;
     private float lastHeatInc;
+    private float lastMoneyInc;
 
     private Cell[,] cellsGrid;
     private Dictionary<ItemType, List<Cell>> reactorItems = new Dictionary<ItemType, List<Cell>>()
@@ -97,6 +99,7 @@ public class ReactorManager : MonoBehaviour
         set
         {
             maxPower = value;
+            powerText.text = Formatter.BigNumbersFormat(reactor.power) + " / " + Formatter.BigNumbersFormat(maxPower);
             powerBar.maxValue = maxPower;
         }
     }
@@ -106,6 +109,7 @@ public class ReactorManager : MonoBehaviour
         set
         {
             maxHeat = value;
+            heatText.text = Formatter.BigNumbersFormat(reactor.heat) + " / " + Formatter.BigNumbersFormat(maxPower);
             heatBar.maxValue = maxHeat;
         }
     }
@@ -385,6 +389,11 @@ public class ReactorManager : MonoBehaviour
         float soldPower = reactor.power < canSellPower ? reactor.power : canSellPower;
         if(soldPower > 0) Power -= soldPower;
         PlayerManager.Instance.Money += addMoney + soldPower;
+        if(lastMoneyInc != soldPower)
+        {
+            moneyMonitorText.text = "+" + Formatter.BigNumbersFormat(soldPower);
+            lastMoneyInc = soldPower;
+        }
 
         #if UNITY_EDITOR
         //DEBUG
@@ -432,13 +441,11 @@ public class ReactorManager : MonoBehaviour
         {
             ItemInfo itemInfo = ItemsManager.Instance.itemsInfo[cell.cellItem.ItemType][cell.cellItem.itemGradeType];
             float durability = itemInfo.durability * ItemInfo.GetItemDurabilityMultipler(cell.cellItem.ItemType, cell.cellItem.itemGradeType);
-            CalcMaxPower();
         }
         if(cell.cellItem.ItemType == ItemType.HeatPlate)
         {
             ItemInfo itemInfo = ItemsManager.Instance.itemsInfo[cell.cellItem.ItemType][cell.cellItem.itemGradeType];
             float durability = itemInfo.durability * ItemInfo.GetItemDurabilityMultipler(cell.cellItem.ItemType, cell.cellItem.itemGradeType);
-            CalcMaxHeat();
         }
         PoolManager.Instance.ReturnItemToPool(cell.cellItem);
         cell.cellItem = null;
@@ -585,16 +592,28 @@ public class ReactorManager : MonoBehaviour
 
     internal void SellItem(Cell cell)
     {
-        ItemInfo itemInfo = ItemsManager.Instance.itemsInfo[cell.cellItem.ItemType][cell.cellItem.itemGradeType];
-        if (cell.cellItem.ItemType == ItemType.Rod)
+        IItem cellItem = cell.cellItem;
+        ItemInfo itemInfo = ItemsManager.Instance.itemsInfo[cellItem.ItemType][cellItem.itemGradeType];
+        if (cellItem.ItemType == ItemType.Rod)
         {
-            PlayerManager.Instance.Money += itemInfo.cost * (cell.cellItem.durability / itemInfo.durability);
+            PlayerManager.Instance.Money += itemInfo.cost * (cellItem.durability / itemInfo.durability);
         }
         else
         {
-            if (cell.cellItem.heat != 0)
+            if(cellItem.ItemType == ItemType.Battery)
             {
-                PlayerManager.Instance.Money += itemInfo.cost - itemInfo.cost * (cell.cellItem.heat / itemInfo.durability);
+                float durability = itemInfo.durability * ItemInfo.GetItemDurabilityMultipler(cellItem.ItemType, cellItem.itemGradeType);
+                MaxPower -= durability;
+            }
+            else if (cellItem.ItemType == ItemType.HeatPlate)
+            {
+                float durability = itemInfo.durability * ItemInfo.GetItemDurabilityMultipler(cellItem.ItemType, cellItem.itemGradeType);
+                MaxHeat -= durability;
+            }
+
+            if (cellItem.heat != 0)
+            {
+                PlayerManager.Instance.Money += itemInfo.cost - itemInfo.cost * (cellItem.heat / itemInfo.durability);
             }
             else
             {
